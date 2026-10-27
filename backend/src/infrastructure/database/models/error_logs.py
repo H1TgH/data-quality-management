@@ -4,9 +4,9 @@ from sqlalchemy import ForeignKey, String, text
 from sqlalchemy.dialects.postgresql import ARRAY, ENUM, JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
-from core.error_logs.enums import ErrorStatusEnum
-from core.rules.enums import RuleTypeEnum
-from infrastructure.database.database import Base
+from backend.src.core.error_logs.enums import ErrorStatusEnum
+from backend.src.core.rules.enums import RuleTypeEnum
+from backend.src.infrastructure.database.database import Base
 
 
 class ErrorLogModel(Base):

@@ -6,8 +6,8 @@ from sqlalchemy import DateTime as PGDateTime, ForeignKey, Integer, Numeric, fun
 from sqlalchemy.dialects.postgresql import ENUM, UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
-from core.runs.enums import RunStatusEnum, RunTriggerEnum
-from infrastructure.database.database import Base
+from backend.src.core.runs.enums import RunStatusEnum, RunTriggerEnum
+from backend.src.infrastructure.database.database import Base
 
 
 class RunModel(Base):

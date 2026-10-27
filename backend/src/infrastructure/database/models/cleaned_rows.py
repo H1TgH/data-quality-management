@@ -4,8 +4,8 @@ from sqlalchemy import ForeignKey, String
 from sqlalchemy.dialects.postgresql import ARRAY, ENUM, JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
-from core.rules.enums import RuleTypeEnum
-from infrastructure.database.database import Base
+from backend.src.core.rules.enums import RuleTypeEnum
+from backend.src.infrastructure.database.database import Base
 
 
 class CleanedRowsModel(Base):

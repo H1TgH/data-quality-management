@@ -5,8 +5,8 @@ from sqlalchemy import DateTime as PGDateTime, Integer, String, func
 from sqlalchemy.dialects.postgresql import ENUM, UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
-from core.data_sources.enums import DataSourceTypeEnum
-from infrastructure.database.database import Base
+from backend.src.core.data_sources.enums import DataSourceTypeEnum
+from backend.src.infrastructure.database.database import Base
 
 
 class DataSourceModel(Base):

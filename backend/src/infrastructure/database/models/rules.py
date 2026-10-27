@@ -5,8 +5,8 @@ from sqlalchemy import DateTime as PGDateTime, ForeignKey, String, func, text
 from sqlalchemy.dialects.postgresql import ARRAY, ENUM, JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
-from core.rules.enums import RuleActionEnum, RuleTypeEnum
-from infrastructure.database.database import Base
+from backend.src.core.rules.enums import RuleActionEnum, RuleTypeEnum
+from backend.src.infrastructure.database.database import Base
 
 
 class RuleModel(Base):

@@ -5,7 +5,7 @@ from sqlalchemy import DateTime as PGDateTime, ForeignKey, Integer, Numeric, Str
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
-from infrastructure.database.database import Base
+from backend.src.infrastructure.database.database import Base
 
 
 class FieldProfileModel(Base):
