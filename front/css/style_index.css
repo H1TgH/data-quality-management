@@ -1,0 +1,372 @@
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    font-family: "Montserrat", Arial, Helvetica, sans-serif;
+    color: #000;
+}
+
+/* ---------- Шапка ---------- */
+:root {
+    --header-h: 68px;
+}
+
+.header {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    height: var(--header-h);
+    background: #fff;
+    border-bottom: solid 1px #EDE9E9;
+}
+
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 100%;
+    margin: 0 6%;
+}
+
+.logo-block {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.header-content .img1 {
+    height: 40px;
+    width: 40px;
+    display: block;
+}
+
+.site-title {
+    font-weight: 500;
+    font-size: 28px;
+    line-height: 1;
+    margin-top: 5px;
+}
+
+.h-c-2 {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.icons {
+    display: flex;
+    align-items: center;
+    flex: 1;
+}
+
+.header-content .img2,
+.header-content .img3 {
+    height: 30px;
+    width: 30px;
+    display: block;
+    margin: 0 20px;
+}
+
+.h-c-2::after {
+    content: "";
+    display: block;
+    height: 6px;
+    width: 100%;
+    background: #D33479;
+    border-radius: 8px;
+    margin-bottom: -1px;
+}
+
+/* ---------- Каркас ---------- */
+.content {
+    display: flex;
+    min-height: calc(100vh - var(--header-h));
+}
+
+.menu-content {
+    display: flex;
+    flex-direction: column;
+    width: 190px;
+    flex-shrink: 0;
+    position: sticky;
+    top: var(--header-h);
+    height: calc(100vh - var(--header-h));
+    align-self: flex-start;
+    padding: 70px 0 40px 18px;
+    border-right: 1px solid #EDE9E9;
+}
+
+.m-c-1 ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.m-c-1 li {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 5px 10px;
+    margin-bottom: 14px;
+    font-size: 14px;
+    line-height: 1.25;
+    border-radius: 3px;
+    position: relative;
+}
+
+.m-c-1 li img {
+    width: 24px;
+    height: 24px;
+}
+
+.m-c-1 li.active {
+    background: #FBDCE8;
+    color: #D33479;
+}
+
+.m-c-1 li.active::before {
+    content: "";
+    position: absolute;
+    left: -10px;
+    top: -4px;
+    bottom: -4px;
+    width: 5px;
+    background: #D33479;
+    border-radius: 3px;
+}
+
+.m-c-2 {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: auto;
+    font-size: 11px;
+}
+
+.m-c-2 img {
+    width: 20px;
+    height: 20px;
+}
+
+.content a {
+    text-decoration: none;
+    color: inherit;
+}
+
+.content img {
+    display: block;
+}
+
+/* ---------- Основная область ---------- */
+.main-content {
+    flex: 1;
+    padding: 80px 60px 60px;
+    min-width: 0;
+}
+
+/* Карточки статистики */
+.analis-content {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.stat-card {
+    width: 292px;
+    height: 180px;
+    padding: 24px 10px 10px;
+    border: 2px solid #E4E4E4;
+    box-shadow: 2px 3px 4px rgba(0, 0, 0, 0.25);
+    background: #fff;
+}
+
+.stat-label {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 500;
+    line-height: 1.3;
+    max-width: 180px;
+}
+
+.stat-value {
+    margin: 28px 0 0 28px;
+    font-size: 56px;
+    font-weight: 400;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.total_active_projects .stat-value { color: #D33479; }
+
+.average_data_score { background: #EBFDDF; border-color: #DFF5D0; }
+.average_data_score .stat-value { color: #5B9A24; }
+
+.projects_require_attention { background: #FFD9D9; border-color: #F7C9C9; }
+.projects_require_attention .stat-value { color: #D93A3A; }
+
+.warn-icon {
+    width: 32px;
+    height: 32px;
+    fill: #D93A3A;
+    margin-top: 12px;
+}
+
+/* Кнопка */
+.create_project {
+    display: flex;
+    justify-content: flex-end;
+    max-width: 1396px;
+    margin: 22px 0 24px;
+}
+
+.create_project button {
+    font-family: inherit;
+    font-size: 17px;
+    font-weight: 500;
+    color: #fff;
+    background: #BE2D6B;
+    border: none;
+    border-radius: 8px;
+    padding: 9px 22px;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.create_project button:hover { background: #A52459; }
+.create_project button:focus-visible { outline: 3px solid #F2A3C3; outline-offset: 2px; }
+
+/* ---------- Карточки проектов ---------- */
+.all_project {
+    display: grid;
+    grid-template-columns: repeat(3, 355px);
+    gap: 22px;
+    max-width: 1300px;
+}
+
+.project-card {
+    position: relative;
+    min-height: 232px;
+    padding: 20px 20px 24px;
+    border: 1px solid #EDE9E9;
+    border-radius: 8px;
+    background: #fff;
+}
+
+.project-name {
+    margin: 4px 0 6px;
+    font-size: 18px;
+    font-weight: 500;
+    color: #C2185B;
+    line-height: 1.2;
+}
+
+.project-tag {
+    display: inline-block;
+    padding: 3px 11px;
+    border-radius: 4px;
+    background: #F7DDE5;
+    color: #C2185B;
+    font-size: 15px;
+}
+
+.small-label {
+    font-size: 13px;
+    line-height: 1.25;
+    color: #333;
+    max-width: 90px;
+}
+
+.score-row {
+    display: flex;
+    align-items: center;
+    margin-top: 22px;
+}
+
+.score {
+    margin-left: 44px;
+    font-size: 36px;
+    line-height: 1;
+}
+
+.score-good { color: #5B9A24; }
+.score-mid  { color: #C9C91A; }
+.score-bad  { color: #D93A3A; }
+
+.arrow {
+    position: relative;
+    margin-left: auto;
+    width: 44px;
+    height: 1px;
+    background: #CFCFCF;
+}
+
+.arrow::after {
+    content: "";
+    position: absolute;
+    right: 0;
+    top: -4px;
+    width: 8px;
+    height: 8px;
+    border-top: 1px solid #CFCFCF;
+    border-right: 1px solid #CFCFCF;
+    transform: rotate(45deg);
+}
+
+.run-row {
+    display: flex;
+    gap: 14px;
+    margin-top: 28px;
+    font-size: 15px;
+    line-height: 1.35;
+}
+
+.run-row .small-label { max-width: 85px; flex-shrink: 0; }
+
+.status { font-size: 15px; }
+.status.ok { color: #5B9A24; }
+.status.error { color: #D93A3A; }
+
+/* Меню «три точки» */
+.card-menu {
+    position: absolute;
+    top: 12px;
+    right: 14px;
+    width: 20px;
+    height: 24px;
+    border: none;
+    background: none;
+    cursor: pointer;
+}
+
+.card-menu::before {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 3px;
+    width: 4px;
+    height: 4px;
+    margin-left: -2px;
+    border-radius: 50%;
+    background: #C9C9C9;
+    box-shadow: 0 7px 0 #C9C9C9, 0 14px 0 #C9C9C9;
+}
+
+.card-menu:hover::before {
+    background: #D33479;
+    box-shadow: 0 7px 0 #D33479, 0 14px 0 #D33479;
+}
+
+/* ---------- Адаптив ---------- */
+@media (max-width: 1450px) {
+    .all_project { grid-template-columns: repeat(2, 405px); }
+}
+
+@media (max-width: 1000px) {
+    .menu-content { display: none; }
+    .main-content { padding: 32px 20px; }
+    .all_project { grid-template-columns: 1fr; }
+    .stat-card { width: 100%; }
+    .site-title { font-size: 22px; }
+}
