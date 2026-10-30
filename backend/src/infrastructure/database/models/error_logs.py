@@ -4,9 +4,9 @@ from sqlalchemy import ForeignKey, String, text
 from sqlalchemy.dialects.postgresql import ARRAY, ENUM, JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
-from backend.src.core.error_logs.enums import ErrorStatusEnum
-from backend.src.core.rules.enums import RuleTypeEnum
-from backend.src.infrastructure.database.database import Base
+from core.error_logs.enums import ErrorStatusEnum
+from core.rules.enums import RuleTypeEnum
+from infrastructure.database.database import Base
 
 
 class ErrorLogModel(Base):
@@ -30,7 +30,7 @@ class ErrorLogModel(Base):
     )
 
     rule_type: Mapped[RuleTypeEnum] = mapped_column(
-        ENUM(RuleTypeEnum, name="rule_type"),
+        ENUM(RuleTypeEnum, name="rule_type", create_type=False),
         nullable=False
     )
 

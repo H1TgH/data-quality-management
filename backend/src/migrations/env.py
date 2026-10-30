@@ -6,8 +6,17 @@ from sqlalchemy import pool
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
 
-from backend.src.infrastructure.database.database import Base
-from backend.src.settings import settings
+from infrastructure.database.database import Base
+from infrastructure.database.models.cleaned_rows import CleanedRowsModel
+from infrastructure.database.models.column_porilfes import FieldProfileModel
+from infrastructure.database.models.data_sources import DataSourceModel
+from infrastructure.database.models.error_logs import ErrorLogModel
+from infrastructure.database.models.rules import RuleModel
+from infrastructure.database.models.runs import RunModel
+from infrastructure.database.models.projects import ProjectModel
+from infrastructure.database.models.users import UserModel
+
+from settings import settings
 
 
 config = context.config

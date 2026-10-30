@@ -4,8 +4,8 @@ from sqlalchemy import ForeignKey, String
 from sqlalchemy.dialects.postgresql import ARRAY, ENUM, JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
-from backend.src.core.rules.enums import RuleTypeEnum
-from backend.src.infrastructure.database.database import Base
+from core.rules.enums import RuleTypeEnum
+from infrastructure.database.database import Base
 
 
 class CleanedRowsModel(Base):
@@ -24,11 +24,12 @@ class CleanedRowsModel(Base):
     )
 
     rule_id: Mapped[str | None] = mapped_column(
-        UUID(as_uuid=False), ForeignKey("rules.id", ondelete="SET NULL")
+        UUID(as_uuid=False),
+        ForeignKey("rules.id", ondelete="SET NULL")
     )
 
     rule_type: Mapped[RuleTypeEnum] = mapped_column(
-        ENUM(RuleTypeEnum, name="rule_type"),
+        ENUM(RuleTypeEnum, name="rule_type", create_type=False),
         nullable=False
     )
 

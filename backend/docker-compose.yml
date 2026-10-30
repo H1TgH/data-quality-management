@@ -1,0 +1,71 @@
+services:
+  fastapi_backend:
+    container_name: fastapi_backend
+    build:
+      context: .
+    command: [ "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--reload" ]
+    depends_on:
+      migrations:
+        condition: service_completed_successfully
+    env_file:
+      - ".env"
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./src:/src
+  
+  db:
+    container_name: db
+    image: postgres:18.6-alpine
+    env_file:
+      - ".env"
+    volumes:
+      - postgres_data:/var/lib/postgresql
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U $POSTGRES_USER" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+  
+  test_external_db:
+    container_name: test_source_db
+    image: postgres:18.6-alpine
+    environment:
+      POSTGRES_USER: test_user
+      POSTGRES_PASSWORD: test_password
+      POSTGRES_DB: orders
+    ports:
+      - "5433:5432"
+    volumes:
+      - ./test_data:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U test_user -d orders" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+  
+  pg_ui:
+    container_name: pg_ui
+    image: dpage/pgadmin4:9.18.0
+    depends_on:
+      - db
+    env_file:
+      - ".env"
+    ports:
+      - "5050:80"
+  
+  migrations:
+    container_name: migrations
+    build:
+      context: .
+    command: ["alembic", "-c", "/src/alembic.ini", "upgrade", "head"]
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file:
+      - ".env"
+    volumes:
+      - ./src:/src
+
+volumes:
+  postgres_data:
