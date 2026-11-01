@@ -1,0 +1,166 @@
+/* ========== ОБЩИЕ СТИЛИ (шапка + боковая панель) ========== */
+
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    font-family: "Montserrat", Arial, Helvetica, sans-serif;
+    color: #000;
+}
+
+/* ---------- Шапка ---------- */
+:root {
+    --header-h: 68px;
+}
+
+.header {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    height: var(--header-h);
+    background: #fff;
+    border-bottom: solid 1px #EDE9E9;
+}
+
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 100%;
+    margin: 0 6%;
+}
+
+.logo-block {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.header-content .img1 {
+    height: 40px;
+    width: 40px;
+    display: block;
+}
+
+.site-title {
+    font-weight: 500;
+    font-size: 28px;
+    line-height: 1;
+    margin-top: 5px;
+}
+
+.h-c-2 {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.icons {
+    display: flex;
+    align-items: center;
+    flex: 1;
+}
+
+.header-content .img2,
+.header-content .img3 {
+    height: 30px;
+    width: 30px;
+    display: block;
+    margin: 0 20px;
+}
+
+.h-c-2::after {
+    content: "";
+    display: block;
+    height: 6px;
+    width: 100%;
+    background: #D33479;
+    border-radius: 8px;
+    margin-bottom: -1px;
+}
+
+/* ---------- Каркас ---------- */
+.content {
+    display: flex;
+    min-height: calc(100vh - var(--header-h));
+}
+
+.menu-content {
+    display: flex;
+    flex-direction: column;
+    width: 190px;
+    flex-shrink: 0;
+    position: sticky;
+    top: var(--header-h);
+    height: calc(100vh - var(--header-h));
+    align-self: flex-start;
+    padding: 70px 0 40px 18px;
+    border-right: 1px solid #EDE9E9;
+}
+
+.m-c-1 ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.m-c-1 li {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 5px 10px;
+    margin-bottom: 14px;
+    font-size: 14px;
+    line-height: 1.25;
+    border-radius: 3px;
+    position: relative;
+}
+
+.m-c-1 li img {
+    width: 24px;
+    height: 24px;
+}
+
+.m-c-1 li.active {
+    background: #FBDCE8;
+    color: #D33479;
+}
+
+.m-c-1 li.active::before {
+    content: "";
+    position: absolute;
+    left: -10px;
+    top: -4px;
+    bottom: -4px;
+    width: 5px;
+    background: #D33479;
+    border-radius: 3px;
+}
+
+.m-c-2 {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: auto;
+    font-size: 11px;
+}
+
+.m-c-2 img {
+    width: 20px;
+    height: 20px;
+}
+
+.content a {
+    text-decoration: none;
+    color: inherit;
+}
+
+.content img {
+    display: block;
+}
+
+/* ---------- Адаптив для общих элементов ---------- */
+@media (max-width: 1000px) {
+    .menu-content { display: none; }
+    .site-title { font-size: 22px; }
+}
