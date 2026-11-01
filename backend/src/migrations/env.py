@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import async_engine_from_config
 
 from infrastructure.database.database import Base
 from infrastructure.database.models.cleaned_rows import CleanedRowsModel
-from infrastructure.database.models.column_porilfes import FieldProfileModel
+from src.infrastructure.database.models.column_profiles import FieldProfileModel
 from infrastructure.database.models.data_sources import DataSourceModel
 from infrastructure.database.models.error_logs import ErrorLogModel
 from infrastructure.database.models.rules import RuleModel

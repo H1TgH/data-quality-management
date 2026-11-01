@@ -1,0 +1,30 @@
+class DataSourceException(Exception):
+    """Base exception for data source exceptions."""
+
+
+class DataSourceConnectionException(DataSourceException):
+    """Base exception for connection exceptions."""
+
+
+class DataSourceNetworkException(DataSourceConnectionException):
+    """Network-related connection exception."""
+
+
+class DataSourceUnavailableException(DataSourceConnectionException):
+    """Database server is temporarily unavailable."""
+
+
+class DataSourceTimeoutException(DataSourceConnectionException):
+    """Connection attempt timed out."""
+
+
+class DataSourceAuthException(DataSourceException):
+    """Authentication failed."""
+
+
+class DataSourceConfigurationException(DataSourceException):
+    """Invalid database configuration."""
+
+
+class DataSourceNotFoundException(DataSourceException):
+    """Data source not found."""
