@@ -8,13 +8,13 @@ from core.data_sources.enums import DataSourceTypeEnum
 from core.data_sources.service import DataSourceService
 
 
-data_source_router = APIRouter(
+router = APIRouter(
     prefix="/data-sources",
     tags=["data-sources"]
 )
 
 
-@data_source_router.post(
+@router.post(
     "/db",
     status_code=status.HTTP_201_CREATED,
 )
@@ -35,7 +35,7 @@ async def create_data_sources(
     }
 
 
-@data_source_router.get(
+@router.get(
     "/{source_id}/tables",
     status_code=status.HTTP_200_OK,
     response_model=DataSourceTablesResponseSchema

@@ -6,9 +6,9 @@ from core.data_sources.exceptions import (
     DataSourceAuthException,
     DataSourceConfigurationException,
     DataSourceNetworkException,
+    DataSourceNotFoundException,
     DataSourceTimeoutException,
     DataSourceUnavailableException,
-    DataSourceNotFoundException
 )
 
 
