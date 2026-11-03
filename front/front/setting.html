@@ -1,0 +1,139 @@
+<!-- ================= setting.html ================= -->
+<!-- ЧТО ИСПРАВЛЕНО:
+     1. Убраны JS и CSS, вставленные прямо внутрь <body> (они ломали разметку и выводились как текст).
+     2. Карточкам проектов добавлен data-key — без него модалка открывалась пустой.
+     3. Модальное окно вынесено ИЗ <section class="content"> (иначе flex-контейнер влиял на неё).
+     4. Скрипт подключён одним файлом js/setting_project.js в конце body. -->
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Quality Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/main_style.css">
+    <link rel="stylesheet" href="css/setting.css">
+</head>
+
+<body>
+
+    <header class="header">
+        <div class="header-content">
+            <div class="logo-block">
+                <img class="img1" src="img/logo.png" alt="logo">
+                <span class="site-title">Data Quality Dashboard</span>
+            </div>
+            <div class="h-c-2">
+                <div class="icons">
+                    <img class="img2" src="img/notifications.png" alt="notifications">
+                    <img class="img3" src="img/profile.png" alt="profile">
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <section class="content">
+        <aside class="menu-content">
+            <nav class="m-c-1">
+                <ul>
+                    <li id="project_portfolio"><img src="img/project_portfolio.png" alt=""><a href="index.html">Портфель
+                            Проектов</a></li>
+                    <li id="rule_settings" class="active"><img src="img/rule_settings.png" alt=""><a href="#">Настройки
+                            Правил</a></li>
+                </ul>
+            </nav>
+            <div class="m-c-2">
+                <img src="img/settings.png" alt=""><a href="#">Администрирование</a>
+            </div>
+        </aside>
+
+        <main class="main">
+            <h2 class="main__title">Набор правил для проектов</h2>
+
+            <div class="projects-list">
+
+                <!-- ВАЖНО: data-key обязателен — по нему загружаются правила проекта -->
+                <a href="#" class="project-card" data-key="raw.orders">
+                    <div class="project-card__left">
+                        <h3 class="project-card__name">"Витрина заказов К-телеком"</h3>
+                        <span class="project-card__table">raw.orders</span>
+                    </div>
+                    <div class="project-card__center">
+                        <span class="project-card__count">Правил: 6</span>
+                    </div>
+                    <svg class="project-card__arrow" viewBox="0 0 24 24" fill="none" stroke="#aaaaaa" stroke-width="2">
+                        <path d="M5 12h14M12 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                </a>
+
+                <a href="#" class="project-card" data-key="raw.amount">
+                    <div class="project-card__left">
+                        <h3 class="project-card__name">"Продажи К-телеком"</h3>
+                        <span class="project-card__table">raw.amount</span>
+                    </div>
+                    <div class="project-card__center">
+                        <span class="project-card__count">Правил: 5</span>
+                    </div>
+                    <svg class="project-card__arrow" viewBox="0 0 24 24" fill="none" stroke="#aaaaaa" stroke-width="2">
+                        <path d="M5 12h14M12 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                </a>
+
+                <a href="#" class="project-card" data-key="raw.product">
+                    <div class="project-card__left">
+                        <h3 class="project-card__name">"Товары"</h3>
+                        <span class="project-card__table">raw.product</span>
+                    </div>
+                    <div class="project-card__center">
+                        <span class="project-card__count">Правил: 7</span>
+                    </div>
+                    <svg class="project-card__arrow" viewBox="0 0 24 24" fill="none" stroke="#aaaaaa" stroke-width="2">
+                        <path d="M5 12h14M12 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                </a>
+
+                <a href="#" class="project-card" data-key="raw.sale">
+                    <div class="project-card__left">
+                        <h3 class="project-card__name">"Клиенты"</h3>
+                        <span class="project-card__table">raw.sale</span>
+                    </div>
+                    <div class="project-card__center">
+                        <span class="project-card__count">Правил: 4</span>
+                    </div>
+                    <svg class="project-card__arrow" viewBox="0 0 24 24" fill="none" stroke="#aaaaaa" stroke-width="2">
+                        <path d="M5 12h14M12 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                </a>
+
+            </div>
+        </main>
+    </section>
+
+    <!-- Модальное окно с правилами проекта (ВНЕ section.content) -->
+    <div class="modal-overlay" id="rulesOverlay" hidden>
+        <div class="rules-modal" role="dialog" aria-modal="true">
+            <button class="rules-modal__close" id="rulesClose" type="button" aria-label="Закрыть">×</button>
+
+            <!-- Шапка столбцов: та же сетка var(--cols), что и у строк => колонки совпадают -->
+            <div class="rules-head">
+                <span class="head-num"></span>
+                <div class="head-card">
+                    <span>Название</span><span>Тип</span><span>Поле</span><span>Параметры</span><span>Реакция</span><span></span>
+                </div>
+            </div>
+
+            <div id="rulesRows"></div>
+            <button class="add-rule" id="addRule" type="button">+ Добавить правило</button>
+            <button class="save-rules" id="saveRules" type="button">Сохранить и Применить правила</button>
+        </div>
+    </div>
+
+    <footer class="footer"></footer>
+
+    <script src="js/setting_project.js"></script>
+</body>
+
+</html>

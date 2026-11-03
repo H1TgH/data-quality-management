@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Quality Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/main_style.css">
+    <link rel="stylesheet" href="css/style_index.css">
+    <link rel="stylesheet" href="css/modal.css">
+</head>
+<body>
+
+    <header class="header">
+        <div class="header-content">
+            <div class="logo-block">
+                <img class="img1" src="img/logo.png" alt="logo">
+                <span class="site-title">Data Quality Dashboard</span>
+            </div>
+            <div class="h-c-2">
+                <div class="icons">
+                    <img class="img2" src="img/notifications.png" alt="notifications">
+                    <img class="img3" src="img/profile.png" alt="profile">
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <section class="content">
+        <aside class="menu-content">
+            <nav class="m-c-1">
+                <ul>
+                    <li id="project_portfolio" class="active"><img src="img/project_portfolio.png" alt=""><a href="#">Портфель Проектов</a></li>
+                    <li id="rule_settings"><img src="img/rule_settings.png" alt=""><a href="setting.html">Настройки Правил</a></li>
+                </ul>
+            </nav>
+            <div class="m-c-2">
+                <img src="img/settings.png" alt=""><a href="#">Администрирование</a>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <div class="analis-content">
+                <div class="stat-card total_active_projects">
+                    <p class="stat-label">Всего активных проектов</p>
+                    <p class="stat-value">4</p>
+                </div>
+                <div class="stat-card average_data_score">
+                    <p class="stat-label">Средняя оценка данных</p>
+                    <p class="stat-value">78%</p>
+                </div>
+                <div class="stat-card projects_require_attention">
+                    <p class="stat-label">Проекты, требующие внимания</p>
+                    <p class="stat-value">2
+                        <svg class="warn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2 1 21h22L12 2zm1 15h-2v-2h2v2zm0-4h-2V9h2v4z"/></svg>
+                    </p>
+                </div>
+            </div>
+
+            <div class="create_project">
+                <button type="button" id="openCreate">+ Создать проект</button>
+            </div>
+
+            <div class="all_project">
+                <article class="project-card">
+                    <button class="card-menu" type="button" aria-label="Действия"></button>
+                    <h3 class="project-name">“Витрина заказов К-телеком”</h3>
+                    <span class="project-tag">raw.orders</span>
+                    <div class="score-row">
+                        <span class="small-label">Оценка данных:</span>
+                        <span class="score score-good">90%</span>
+                        <span class="arrow"></span>
+                    </div>
+                    <div class="run-row">
+                        <span class="small-label">Последний запуск:</span>
+                        <div>
+                            <div>10 октября, 2026, 9:15</div>
+                            <div class="status ok">Успешно!</div>
+                        </div>
+                    </div>
+                </article>
+
+                <article class="project-card">
+                    <button class="card-menu" type="button" aria-label="Действия"></button>
+                    <h3 class="project-name">“Продажи К-телеком”</h3>
+                    <span class="project-tag">raw.amount</span>
+                    <div class="score-row">
+                        <span class="small-label">Оценка данных:</span>
+                        <span class="score score-mid">89%</span>
+                        <span class="arrow"></span>
+                    </div>
+                    <div class="run-row">
+                        <span class="small-label">Последний запуск:</span>
+                        <div>
+                            <div>10 октября, 2026, 8:15</div>
+                            <div class="status error">Ошибки!</div>
+                        </div>
+                    </div>
+                </article>
+
+                <article class="project-card">
+                    <button class="card-menu" type="button" aria-label="Действия"></button>
+                    <h3 class="project-name">“Товары”</h3>
+                    <span class="project-tag">raw.product</span>
+                    <div class="score-row">
+                        <span class="small-label">Оценка данных:</span>
+                        <span class="score score-bad">40%</span>
+                        <span class="arrow"></span>
+                    </div>
+                    <div class="run-row">
+                        <span class="small-label">Последний запуск:</span>
+                        <div>
+                            <div>9 октября, 2026, 9:15</div>
+                            <div class="status error">Ошибки!</div>
+                        </div>
+                    </div>
+                </article>
+
+                <article class="project-card">
+                    <button class="card-menu" type="button" aria-label="Действия"></button>
+                    <h3 class="project-name">“Клиенты”</h3>
+                    <span class="project-tag">raw.sale</span>
+                    <div class="score-row">
+                        <span class="small-label">Оценка данных:</span>
+                        <span class="score score-good">93%</span>
+                        <span class="arrow"></span>
+                    </div>
+                    <div class="run-row">
+                        <span class="small-label">Последний запуск:</span>
+                        <div>
+                            <div>17 октября, 2026, 9:15</div>
+                            <div class="status ok">Успешно!</div>
+                        </div>
+                    </div>
+                </article>
+            </div>
+        </main>
+    </section>
+
+
+    <!-- Мастер создания проекта -->
+    <div class="modal-overlay" id="modal" hidden>
+        <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+            <button class="modal-close" type="button" id="modalClose" aria-label="Закрыть"></button>
+
+            <!-- Шаг 1 -->
+            <section id="step1">
+                <h2 class="modal-title" id="modalTitle">Шаг 1. Подключение</h2>
+                <div class="tabs" role="tablist">
+                    <button class="tab active" type="button" data-tab="db" role="tab">Подключить БД</button>
+                    <button class="tab" type="button" data-tab="file" role="tab">CSV/XLSX</button>
+                </div>
+
+                <form class="tab-panel" id="panel-db" autocomplete="off" novalidate>
+                    <label class="f-row">Тип базы данных:
+                        <select id="dbType"><option>PostgreSQL</option><option>MySQL</option><option>MS SQL Server</option></select>
+                    </label>
+                    <label class="f-row">Сервер: <input id="dbHost" value="localhost"></label>
+                    <label class="f-row">Порт: <input id="dbPort" value="5432" inputmode="numeric"></label>
+                    <label class="f-row">Наименование базы данных: <input id="dbName" value="orders"></label>
+                    <label class="f-row">Пользователь: <input id="dbUser" value="postgres"></label>
+                    <label class="f-row">Пароль: <input id="dbPass" type="password" value="**********"></label>
+                    <p class="msg error" id="dbError" hidden>Не удалось подключиться к базе данных!</p>
+                    <div class="btn-row"><button class="btn" type="submit">Подключиться</button></div>
+                </form>
+
+                <div class="tab-panel" id="panel-file" hidden>
+                    <p class="msg error" id="fileError" hidden>Не удалось загрузить файл!</p>
+                    <label class="dropzone" id="dropzone" tabindex="0">
+                        <svg viewBox="0 0 64 80" width="70" height="86" aria-hidden="true"><rect x="2" y="2" width="60" height="76" rx="8" fill="#F3F3F3" stroke="#BDBDBD" stroke-width="3"/><rect x="12" y="12" width="40" height="10" fill="#BDBDBD"/><rect x="12" y="30" width="40" height="3" fill="#BDBDBD"/><rect x="12" y="40" width="40" height="3" fill="#BDBDBD"/><rect x="12" y="50" width="24" height="3" fill="#BDBDBD"/></svg>
+                        <span>Перетащите CSV/XLSX файл сюда<br>или<br>нажмите для выбора</span>
+                        <input type="file" id="fileInput" accept=".csv,.xlsx" hidden>
+                    </label>
+                    <div id="fileOk" hidden>
+                        <p class="msg ok" id="fileOkText"></p>
+                        <div class="file-row">
+                            <svg viewBox="0 0 64 80" width="24" height="30" aria-hidden="true"><rect x="2" y="2" width="60" height="76" rx="8" fill="#fff" stroke="#BDBDBD" stroke-width="3"/><rect x="12" y="20" width="40" height="3" fill="#BDBDBD"/><rect x="12" y="32" width="40" height="3" fill="#BDBDBD"/><rect x="12" y="44" width="24" height="3" fill="#BDBDBD"/></svg>
+                            <span id="fileName"></span>
+                            <button type="button" class="file-remove" id="fileRemove" aria-label="Удалить файл">×</button>
+                        </div>
+                        <div class="btn-row"><button class="btn" type="button" id="fileNext">Далее</button></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Шаг 2 -->
+            <section id="step2" hidden>
+                <h2 class="modal-title">Шаг 2. Автопрофилирование</h2>
+                <label class="f-row table-select" id="tableRow" hidden>Таблица:
+                    <select id="tableSelect"><option>orders</option><option>customers</option><option>products</option></select>
+                </label>
+                <div class="profile-meta">
+                    <span id="metaSource">primer.xlsx</span><span>1000 строк</span><span>14 полей</span>
+                </div>
+                <div class="table-wrap">
+                    <table class="profile-table">
+                        <thead><tr><th>Поле</th><th>Тип</th><th>Заполненность</th><th>Мин.</th><th>Макс.</th></tr></thead>
+                        <tbody id="profileBody"></tbody>
+                    </table>
+                </div>
+                <div class="notes">
+                    <p class="notes-title">Примечание по данным:</p>
+                    <ul>
+                        <li><b>quantity, age:</b> отрицательные минимальные значения</li>
+                        <li><b>age, unit_price:</b> максимум сильно отклоняется от основной массы</li>
+                        <li><b>order_date, ship_date:</b> максимум позже текущей даты</li>
+                        <li><b>ship_date:</b> отсутствует 25% значений</li>
+                        <li><b>email, phone:</b> часть значений не соответствует типовому формату</li>
+                        <li><b>status:</b> мало уникальных значений (возможно, справочник)</li>
+                    </ul>
+                </div>
+                <p class="clean-note">Данные будут очищены от дубликатов и Null и пройдут проверку по заданным правилам!</p>
+                <div class="btn-row center"><button class="btn" type="button" id="toRules">Перейти к правилам</button></div>
+            </section>
+        </div>
+    </div>
+
+    <footer class="footer"></footer>
+
+    <script src="js/auth.js"></script>
+    <script src="js/create_project.js"></script>
+</body>
+</html>
