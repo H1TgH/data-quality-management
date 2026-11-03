@@ -1,7 +1,7 @@
 from datetime import datetime
 from uuid import uuid4
 
-from sqlalchemy import DateTime as PGDateTime, Integer, String, func
+from sqlalchemy import BigInteger, DateTime as PGDateTime, Integer, String, func
 from sqlalchemy.dialects.postgresql import ENUM, UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -24,23 +24,43 @@ class DataSourceModel(Base):
     )
 
     host: Mapped[str | None] = mapped_column(
-        String
+        String,
+        nullable=True
     )
 
     port: Mapped[int | None] = mapped_column(
-        Integer
+        Integer,
+        nullable=True
     )
 
     db_name: Mapped[str | None] = mapped_column(
-        String
+        String,
+        nullable=True
     )
 
     username: Mapped[str | None] = mapped_column(
-        String
+        String,
+        nullable=True
     )
 
     password_encrypted: Mapped[str | None] = mapped_column(
-        String
+        String,
+        nullable=True
+    )
+
+    file_name: Mapped[str | None] = mapped_column(
+        String,
+        nullable=True
+    )
+
+    file_size_bytes: Mapped[int | None] = mapped_column(
+        BigInteger,
+        nullable=True
+    )
+
+    file_format: Mapped[str | None] = mapped_column(
+        String,
+        nullable=True
     )
 
     created_at: Mapped[datetime] = mapped_column(

@@ -9,6 +9,11 @@ from core.data_sources.exceptions import (
     DataSourceNotFoundException,
     DataSourceTimeoutException,
     DataSourceUnavailableException,
+    EmptyFileException,
+    FileParsingException,
+    FileTooLargeException,
+    TooManyRowsException,
+    UnsupportedFileFormatException,
 )
 
 
@@ -51,6 +56,18 @@ def handle_data_source_exceptions(func):
         except DataSourceNotFoundException as exc:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
+                detail=str(exc)
+            ) from exc
+
+        except (UnsupportedFileFormatException, EmptyFileException, FileParsingException) as exc:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=str(exc)
+            ) from exc
+
+        except (FileTooLargeException, TooManyRowsException) as exc:
+            raise HTTPException(
+                status_code=status.HTTP_413_CONTENT_TOO_LARGE,
                 detail=str(exc)
             ) from exc
 

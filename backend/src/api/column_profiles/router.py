@@ -27,3 +27,14 @@ async def profile_table(
         schema=schema,
         table_name=table_name,
     )
+
+
+@router.get(
+    "/{source_id}/file",
+    response_model=TableProfileSchema,
+)
+async def profile_file(
+    source_id: str,
+    service: ColumnProfileService = Depends(get_column_profile_service),
+) -> TableProfileSchema:
+    return await service.profile_file(source_id)

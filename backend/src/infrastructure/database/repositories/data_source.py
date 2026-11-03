@@ -1,4 +1,4 @@
-from uuid import uuid4
+from uuid import UUID, uuid4
 
 from sqlalchemy import Row, text
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -53,3 +53,34 @@ class DataSourceRepository:
             {"source_id": source_id}
         )
         return result.one_or_none()
+
+    async def create_file(
+        self,
+        source_id: str,
+        file_name: str,
+        file_size_bytes: int,
+        file_format: str,
+    ) -> None:
+        await self.session.execute(
+            text("""
+                INSERT INTO data_sources (id, type, file_name, file_size_bytes, file_format)
+                VALUES (:id, 'FILE', :file_name, :file_size_bytes, :file_format)
+            """),
+            {
+                "id": UUID(source_id),
+                "file_name": file_name,
+                "file_size_bytes": file_size_bytes,
+                "file_format": file_format,
+            },
+        )
+
+    async def get_by_id(self, source_id: str):
+        result = await self.session.execute(
+            text("""
+                SELECT id, type, file_name, file_size_bytes, file_format
+                FROM data_sources
+                WHERE id = :id
+            """),
+            {"id": UUID(source_id)},
+        )
+        return result.mappings().first()

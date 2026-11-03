@@ -20,6 +20,16 @@ class DataBaseSettings(BaseSettings):
     def database_url(self):
         return f"postgresql+asyncpg://{self.user}:{self.password.get_secret_value()}@{self.host}:{self.port}/{self.db}"
 
+    @property
+    def app_db_connection_params(self) -> dict:
+        return {
+            "host": self.host,
+            "port": self.port,
+            "user": self.user,
+            "password": self.password.get_secret_value(),
+            "database": self.db,
+        }
+
     model_config = SettingsConfigDict(
         env_prefix="POSTGRES_"
     )

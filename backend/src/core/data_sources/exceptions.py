@@ -28,3 +28,27 @@ class DataSourceConfigurationException(DataSourceException):
 
 class DataSourceNotFoundException(DataSourceException):
     """Data source not found."""
+
+
+class FileDataSourceException(Exception):
+    """Базовый класс ошибок загрузки файла."""
+
+
+class UnsupportedFileFormatException(FileDataSourceException):
+    pass
+
+
+class FileTooLargeException(FileDataSourceException):
+    pass
+
+
+class TooManyRowsException(FileDataSourceException):
+    pass
+
+
+class EmptyFileException(FileDataSourceException):
+    pass
+
+
+class FileParsingException(FileDataSourceException):
+    pass

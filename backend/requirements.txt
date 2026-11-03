@@ -32,8 +32,12 @@ pydantic-core==2.41.5
     # via pydantic
 pydantic-settings==2.13.1
     # via data-quality-management
+python-calamine==0.9.1
+    # via data-quality-management
 python-dotenv==1.2.2
     # via pydantic-settings
+python-multipart==0.0.33
+    # via data-quality-management
 ruff==0.15.4
     # via data-quality-management
 sqlalchemy==2.0.47
