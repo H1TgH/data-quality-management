@@ -15,6 +15,7 @@ from core.data_sources.exceptions import (
 )
 from core.data_sources.staging import staging_table_name
 from infrastructure.database.repositories.data_source import DataSourceRepository
+from infrastructure.database.repositories.project import ProjectRepository
 from infrastructure.database.staging_loader import StagingLoader
 from infrastructure.file_parsers.reader import read_table
 
@@ -26,9 +27,11 @@ class FileDataSourceService:
     def __init__(
         self,
         data_source_repository: DataSourceRepository,
+        project_repository: ProjectRepository,
         staging_loader: StagingLoader,
     ) -> None:
         self.data_source_repo = data_source_repository
+        self.project_repo = project_repository
         self.staging_loader = staging_loader
 
     async def upload(
@@ -89,11 +92,18 @@ class FileDataSourceService:
                 rows.close()   # закрывает открытый csv-файл
 
         try:
+            name = Path(file_name).stem
             await self.data_source_repo.create_file(
                 source_id=source_id,
                 file_name=file_name,
                 file_size_bytes=size,
                 file_format=file_format,
+            )
+            project_id = await self.project_repo.create(
+                data_source_id=source_id,
+                name=name[:1].upper() + name[1:],
+                schema_name="staging",
+                table_name=table_name,
             )
         except Exception:
             await self.staging_loader.drop(table_name)
@@ -101,6 +111,7 @@ class FileDataSourceService:
 
         return FileSourceDTO(
             source_id=source_id,
+            project_id=project_id,
             file_name=file_name,
             file_size_bytes=size,
             row_count=row_count,

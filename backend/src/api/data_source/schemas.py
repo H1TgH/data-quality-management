@@ -16,6 +16,7 @@ class DataSourceTablesResponseSchema(BaseModel):
 
 class FileUploadResponseSchema(BaseModel):
     source_id: str
+    project_id: str
     file_name: str
     file_size_bytes: int
     row_count: int

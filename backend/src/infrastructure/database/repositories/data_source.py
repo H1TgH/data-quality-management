@@ -1,4 +1,4 @@
-from uuid import UUID, uuid4
+from uuid import UUID
 
 from sqlalchemy import Row, text
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -84,3 +84,18 @@ class DataSourceRepository:
             {"id": UUID(source_id)},
         )
         return result.mappings().first()
+
+    async def get_data_source_type(self, source_id: str) -> str | None:
+        result = await self.session.execute(
+            text("""
+                SELECT type
+                FROM data_sources
+                WHERE id = :id
+            """),
+            {"id": UUID(source_id)},
+        )
+        data_source_type = result.scalar_one_or_none()
+        if data_source_type is None:
+            return None
+
+        return str(data_source_type)

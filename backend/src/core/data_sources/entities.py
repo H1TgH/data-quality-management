@@ -43,6 +43,7 @@ class DataSourceCredsDTO:
 @dataclass
 class FileSourceDTO:
     source_id: str
+    project_id: str
     file_name: str
     file_size_bytes: int
     row_count: int

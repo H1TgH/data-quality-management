@@ -50,6 +50,9 @@ class DataSourceService:
             total=len(tables)
         )
 
+    async def get_data_source_type(self, source_id: str) -> str | None:
+        return await self.data_source_repo.get_data_source_type(source_id)
+
     async def _get_data_source_creds_or_raise(
         self,
         source_id: str

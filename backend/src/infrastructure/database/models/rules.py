@@ -1,7 +1,7 @@
 from datetime import datetime
 from uuid import uuid4
 
-from sqlalchemy import DateTime as PGDateTime, ForeignKey, String, func, text
+from sqlalchemy import Boolean, DateTime as PGDateTime, ForeignKey, String, func, text
 from sqlalchemy.dialects.postgresql import ARRAY, ENUM, JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -48,6 +48,12 @@ class RuleModel(Base):
     action: Mapped[RuleActionEnum] = mapped_column(
         ENUM(RuleActionEnum, name="rule_action"),
         nullable=False
+    )
+
+    is_active: Mapped[bool] = mapped_column(
+        Boolean,
+        nullable=False,
+        server_default=text("true")
     )
 
     created_at: Mapped[datetime] = mapped_column(
