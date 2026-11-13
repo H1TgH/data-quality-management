@@ -4,6 +4,7 @@ from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.column_profiles.service import ColumnProfileService
+from core.data_sources.entities import DataSourceCredsDTO
 from core.data_sources.file_service import FileDataSourceService
 from core.data_sources.service import DataSourceService
 from core.projects.service import ProjectService
@@ -56,27 +57,37 @@ def get_project_service(
 
 
 def get_column_profile_service(
-    data_source_repository: DataSourceRepository = Depends(get_data_source_repository)
+    data_source_service: DataSourceService = Depends(get_data_source_service)
 ) -> ColumnProfileService:
     return ColumnProfileService(
-        data_source_repository=data_source_repository,
+        data_source_service=data_source_service,
         external_client=PostgresClient(),
+        staging_credentials=DataSourceCredsDTO(
+            host=settings.db.host,
+            port=settings.db.port,
+            db_name=settings.db.db,
+            user=settings.db.user,
+            password=settings.db.password.get_secret_value(),
+        ),
     )
 
 
 def get_file_data_source_service(
-    session: AsyncSession = Depends(get_session)
+    data_source_service: DataSourceService = Depends(get_data_source_service),
+    project_service: ProjectService = Depends(get_project_service),
 ) -> FileDataSourceService:
     return FileDataSourceService(
-        data_source_repository=DataSourceRepository(session),
-        project_repository=ProjectRepository(session),
+        data_source_service=data_source_service,
+        project_service=project_service,
         staging_loader=StagingLoader(settings.db.app_db_connection_params),
     )
 
 
 def get_rule_service(
-    rule_repository: RuleRepository = Depends(get_rule_repository)
+    rule_repository: RuleRepository = Depends(get_rule_repository),
+    project_service: ProjectService = Depends(get_project_service),
 ) -> RuleService:
     return RuleService(
-        rule_repository=rule_repository
+        rule_repository=rule_repository,
+        project_service=project_service,
     )

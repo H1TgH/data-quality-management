@@ -1,6 +1,6 @@
 from uuid import UUID, uuid4
 
-from sqlalchemy import text
+from sqlalchemy import Row, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 
@@ -46,3 +46,14 @@ class ProjectRepository:
             },
         )
         return str(project_id)
+
+    async def get_by_id(self, project_id: str) -> Row | None:
+        result = await self.session.execute(
+            text("""
+                SELECT id, data_source_id, name, schema_name, table_name
+                FROM projects
+                WHERE id = :project_id
+            """),
+            {"project_id": UUID(project_id)},
+        )
+        return result.one_or_none()

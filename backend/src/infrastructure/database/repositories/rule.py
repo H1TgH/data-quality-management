@@ -43,28 +43,6 @@ class RuleRepository:
         )
         return str(result.scalar_one())
 
-    async def get_data_source_id(
-        self,
-        project_id: str
-    ) -> str | None:
-        query = text("""
-            SELECT data_source_id
-            FROM projects
-            WHERE id = :project_id
-        """)
-
-        result = await self.session.execute(
-            query,
-            {
-                "project_id": project_id
-            }
-        )
-        data_source_id = result.scalar_one_or_none()
-        if data_source_id is None:
-            return None
-
-        return str(data_source_id)
-
     async def get_rules_list(
         self,
         project_id: str

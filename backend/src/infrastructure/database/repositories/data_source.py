@@ -1,4 +1,4 @@
-from uuid import UUID
+from uuid import UUID, uuid4
 
 from sqlalchemy import Row, text
 from sqlalchemy.ext.asyncio import AsyncSession

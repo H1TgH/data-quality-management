@@ -1,7 +1,8 @@
 from core.data_sources.enums import DataSourceTypeEnum
 from core.data_sources.exceptions import DataSourceConfigurationException, DataSourceNotFoundException
 from core.data_sources.service import DataSourceService
-from core.projects.entities import ProjectCreationDTO
+from core.projects.entities import ProjectCreationDTO, ProjectReadDTO
+from core.projects.exceptions import ProjectNotFoundException
 from infrastructure.database.repositories.project import ProjectRepository
 
 
@@ -42,4 +43,41 @@ class ProjectService:
             name=project_name,
             schema_name=data.schema_name,
             table_name=data.table_name,
+        )
+
+    async def create_file_project(
+        self,
+        data_source_id: str,
+        name: str,
+        table_name: str,
+    ) -> str:
+        data_source_type = await self.data_source_service.get_data_source_type(data_source_id)
+        if data_source_type is None:
+            raise DataSourceNotFoundException(
+                f"Источник данных с id: {data_source_id} не найден"
+            )
+
+        if data_source_type != DataSourceTypeEnum.FILE:
+            raise DataSourceConfigurationException(
+                "Файловый проект можно создать только для источника типа файл"
+            )
+
+        return await self.project_repo.create(
+            data_source_id=data_source_id,
+            name=name,
+            schema_name="staging",
+            table_name=table_name,
+        )
+
+    async def get_project(self, project_id: str) -> ProjectReadDTO:
+        project = await self.project_repo.get_by_id(project_id)
+        if project is None:
+            raise ProjectNotFoundException(f"Проект с id: {project_id} не найден")
+
+        return ProjectReadDTO(
+            id=str(project.id),
+            data_source_id=str(project.data_source_id),
+            name=project.name,
+            schema_name=project.schema_name,
+            table_name=project.table_name,
         )

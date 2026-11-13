@@ -13,9 +13,9 @@ from core.data_sources.exceptions import (
     FileTooLargeException,
     UnsupportedFileFormatException,
 )
+from core.data_sources.service import DataSourceService
 from core.data_sources.staging import staging_table_name
-from infrastructure.database.repositories.data_source import DataSourceRepository
-from infrastructure.database.repositories.project import ProjectRepository
+from core.projects.service import ProjectService
 from infrastructure.database.staging_loader import StagingLoader
 from infrastructure.file_parsers.reader import read_table
 
@@ -26,12 +26,12 @@ class FileDataSourceService:
 
     def __init__(
         self,
-        data_source_repository: DataSourceRepository,
-        project_repository: ProjectRepository,
+        data_source_service: DataSourceService,
+        project_service: ProjectService,
         staging_loader: StagingLoader,
     ) -> None:
-        self.data_source_repo = data_source_repository
-        self.project_repo = project_repository
+        self.data_source_service = data_source_service
+        self.project_service = project_service
         self.staging_loader = staging_loader
 
     async def upload(
@@ -93,16 +93,15 @@ class FileDataSourceService:
 
         try:
             name = Path(file_name).stem
-            await self.data_source_repo.create_file(
+            await self.data_source_service.create_file(
                 source_id=source_id,
                 file_name=file_name,
                 file_size_bytes=size,
                 file_format=file_format,
             )
-            project_id = await self.project_repo.create(
+            project_id = await self.project_service.create_file_project(
                 data_source_id=source_id,
                 name=name[:1].upper() + name[1:],
-                schema_name="staging",
                 table_name=table_name,
             )
         except Exception:

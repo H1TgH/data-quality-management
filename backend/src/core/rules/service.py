@@ -1,7 +1,8 @@
 from sqlalchemy import Row
 
+from core.projects.service import ProjectService
 from core.rules.entities import RuleCreationDTO, RuleReadDTO, RulesListResponseDTO
-from core.rules.exceptions import ProjectOrDataSourceNotFoundException, RuleNotFoundException
+from core.rules.exceptions import RuleNotFoundException
 from infrastructure.database.repositories.rule import RuleRepository
 
 
@@ -9,16 +10,16 @@ class RuleService:
     def __init__(
         self,
         rule_repository: RuleRepository,
-        # data_source_repository: DataSourceRepository
+        project_service: ProjectService,
     ) -> None:
         self.rule_repo = rule_repository
-        # self.data_source_repo = data_source_repository
+        self.project_service = project_service
 
     async def create_rule(
         self,
         rule_data: RuleCreationDTO
     ) -> str:
-        await self._get_data_source_or_raise(rule_data.project_id)
+        await self._get_project_or_raise(rule_data.project_id)
 
         await self._validate_rule(rule_data)
 
@@ -29,7 +30,7 @@ class RuleService:
         self,
         project_id: str
     ) -> RulesListResponseDTO:  # TODO добавить пагинацию
-        await self._get_data_source_or_raise(project_id)
+        await self._get_project_or_raise(project_id)
 
         rules = await self.rule_repo.get_rules_list(project_id)
 
@@ -46,7 +47,7 @@ class RuleService:
         project_id: str,
         rule_id: str
     ) -> RuleReadDTO | None:
-        await self._get_data_source_or_raise(project_id)
+        await self._get_project_or_raise(project_id)
 
         rule = await self._get_rule_or_raise(project_id, rule_id)
 
@@ -58,7 +59,7 @@ class RuleService:
         rule_id: str,
         rule_data: RuleCreationDTO
     ) -> RuleReadDTO:
-        await self._get_data_source_or_raise(project_id)
+        await self._get_project_or_raise(project_id)
 
         await self._validate_rule(rule_data)
 
@@ -73,7 +74,7 @@ class RuleService:
         project_id: str,
         rule_id: str
     ) -> None:
-        await self._get_data_source_or_raise(project_id)
+        await self._get_project_or_raise(project_id)
 
         rule_is_deleted = await self.rule_repo.delete_rule(project_id, rule_id)
         if not rule_is_deleted:
@@ -85,7 +86,7 @@ class RuleService:
         rule_id: str,
         is_active: bool
     ) -> RuleReadDTO:
-        await self._get_data_source_or_raise(project_id)
+        await self._get_project_or_raise(project_id)
 
         rule = await self.rule_repo.set_rule_is_active(project_id, rule_id, is_active)
         if not rule:
@@ -93,15 +94,11 @@ class RuleService:
 
         return self._build_rule_read_dto(rule)
 
-    async def _get_data_source_or_raise(
+    async def _get_project_or_raise(
         self,
         project_id: str
-    ) -> str:
-        data_source_id = await self.rule_repo.get_data_source_id(project_id)
-        if data_source_id is None:
-            raise ProjectOrDataSourceNotFoundException("Проект или связанный с ним источник данных не найдены")
-
-        return data_source_id
+    ) -> None:
+        await self.project_service.get_project(project_id)
 
     async def _get_rule_or_raise(
         self,

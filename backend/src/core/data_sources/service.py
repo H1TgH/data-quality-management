@@ -15,9 +15,9 @@ from infrastructure.external_databases.postgres_client import PostgresClient
 class DataSourceService:
     def __init__(
         self,
-        data_source_reposisory: DataSourceRepository
+        data_source_repository: DataSourceRepository
     ) -> None:
-        self.data_source_repo = data_source_reposisory
+        self.data_source_repo = data_source_repository
         self.external_client = PostgresClient()  # TODO: не забыть потом убрать при добавлении других субд
 
     async def create(self, data: DataSourceCreationDTO) -> str:
@@ -31,11 +31,25 @@ class DataSourceService:
 
         return await self.data_source_repo.create(data)
 
+    async def create_file(
+        self,
+        source_id: str,
+        file_name: str,
+        file_size_bytes: int,
+        file_format: str,
+    ) -> None:
+        await self.data_source_repo.create_file(
+            source_id=source_id,
+            file_name=file_name,
+            file_size_bytes=file_size_bytes,
+            file_format=file_format,
+        )
+
     async def get_tables(
         self,
         source_id: str
     ) -> DataSourceTablesResponseDTO:
-        creds = await self._get_data_source_creds_or_raise(source_id)
+        creds = await self.get_data_source_creds(source_id)
 
         tables = await self.external_client.get_tables(
             timeout=5,
@@ -53,7 +67,7 @@ class DataSourceService:
     async def get_data_source_type(self, source_id: str) -> str | None:
         return await self.data_source_repo.get_data_source_type(source_id)
 
-    async def _get_data_source_creds_or_raise(
+    async def get_data_source_creds(
         self,
         source_id: str
     ) -> DataSourceCredsDTO:
