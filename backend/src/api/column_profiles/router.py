@@ -7,7 +7,7 @@ from core.column_profiles.service import ColumnProfileService
 
 router = APIRouter(
     prefix="/column-profiles",
-    tags=["Column Profiles"],
+    tags=["column-profiles"],
 )
 
 

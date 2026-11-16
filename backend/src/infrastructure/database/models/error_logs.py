@@ -18,7 +18,7 @@ class ErrorLogModel(Base):
         default=lambda: str(uuid4())
     )
 
-    run_id: Mapped[int] = mapped_column(
+    run_id: Mapped[str] = mapped_column(
         UUID(as_uuid=False),
         ForeignKey("runs.id", ondelete="CASCADE"),
         nullable=False
