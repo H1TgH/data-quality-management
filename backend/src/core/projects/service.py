@@ -1,7 +1,7 @@
 from core.data_sources.enums import DataSourceTypeEnum
 from core.data_sources.exceptions import DataSourceConfigurationException, DataSourceNotFoundException
 from core.data_sources.service import DataSourceService
-from core.projects.entities import ProjectCreationDTO, ProjectReadDTO
+from core.projects.entities import ProjectCreationDTO, ProjectListItemDTO, ProjectReadDTO
 from core.projects.exceptions import ProjectNotFoundException
 from infrastructure.database.repositories.project import ProjectRepository
 
@@ -81,3 +81,27 @@ class ProjectService:
             schema_name=project.schema_name,
             table_name=project.table_name,
         )
+
+    async def get_projects_list(self) -> list[ProjectListItemDTO]:
+        projects = await self.project_repo.get_projects_list()
+
+        return [
+            ProjectListItemDTO(
+                id=str(project.id),
+                data_source_id=str(project.data_source_id),
+                name=project.name,
+                schema_name=project.schema_name,
+                table_name=project.table_name,
+                source_name=project.source_name,
+                quality_score=(
+                    float(project.quality_score)
+                    if project.quality_score is not None else None
+                ),
+                last_run_at=project.last_run_at,
+                last_run_status=(
+                    str(project.last_run_status)
+                    if project.last_run_status is not None else None
+                ),
+            )
+            for project in projects
+        ]

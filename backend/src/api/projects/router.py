@@ -2,7 +2,11 @@ from fastapi import APIRouter, Depends, status
 
 from api.data_source.decorators import handle_data_source_exceptions
 from api.dependencies import get_project_service
-from api.projects.schemas import ProjectCreationResponseSchema, ProjectCreationSchema
+from api.projects.schemas import (
+    ProjectCreationResponseSchema,
+    ProjectCreationSchema,
+    ProjectListItemSchema,
+)
 from core.projects.entities import ProjectCreationDTO
 from core.projects.service import ProjectService
 
@@ -30,3 +34,13 @@ async def create_project(
     return {
         "project_id": project_id
     }
+
+
+@router.get(
+    "/",
+    response_model=list[ProjectListItemSchema],
+)
+async def get_projects(
+    service: ProjectService = Depends(get_project_service),
+):
+    return await service.get_projects_list()
