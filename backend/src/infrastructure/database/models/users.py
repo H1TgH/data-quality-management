@@ -17,6 +17,16 @@ class UserModel(Base):
         default=lambda: str(uuid4())
     )
 
+    name: Mapped[str | None] = mapped_column(
+        String,
+        nullable=True
+    )
+
+    password: Mapped[str | None] = mapped_column(
+        String,
+        nullable=True
+    )
+
     email: Mapped[str] = mapped_column(
         String,
         nullable=False,
@@ -24,6 +34,12 @@ class UserModel(Base):
     )
 
     created_at: Mapped[datetime] = mapped_column(
+        PGDateTime(timezone=True),
+        nullable=False,
+        server_default=func.now()
+    )
+
+    updated_at: Mapped[datetime] = mapped_column(
         PGDateTime(timezone=True),
         nullable=False,
         server_default=func.now()

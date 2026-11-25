@@ -35,8 +35,16 @@ class DataBaseSettings(BaseSettings):
     )
 
 
+class SecuritySettings(BaseSettings):
+    secret_key: SecretStr
+    algorithm: SecretStr
+    access_ttl: int = Field(alias="ACCESS_TOKEN_EXPIRE_MINUTES")
+    refresh_ttl: int = Field(alias="REFRESH_TOKEN_EXPIRE_DAYS")
+
+
 class Settings(BaseSettings):
     db: DataBaseSettings = Field(default_factory=DataBaseSettings)
+    security: SecuritySettings = Field(default_factory=SecuritySettings)
 
 
 settings = Settings()

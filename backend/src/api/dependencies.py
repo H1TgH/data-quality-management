@@ -1,6 +1,7 @@
 from collections.abc import AsyncGenerator
 
-from fastapi import Depends
+from fastapi import Depends, HTTPException, status
+from fastapi.security import APIKeyCookie
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.column_profiles.service import ColumnProfileService
@@ -10,13 +11,21 @@ from core.data_sources.service import DataSourceService
 from core.projects.service import ProjectService
 from core.rules.service import RuleService
 from core.runs.service import RunService
+from core.users.entities import CurrentUserDTO
+from core.users.exceptions import (
+    InvalidTokenException,
+    TokenIsMissingException,
+    UserDoesNotExistException,
+)
+from core.users.service import UserService
 from infrastructure.database.database import Session
-from infrastructure.database.repositories.data_source import DataSourceRepository
 from infrastructure.database.repositories.cleaned_rows import CleanedRowsRepository
+from infrastructure.database.repositories.data_source import DataSourceRepository
 from infrastructure.database.repositories.error_log import ErrorLogRepository
 from infrastructure.database.repositories.project import ProjectRepository
 from infrastructure.database.repositories.rule import RuleRepository
 from infrastructure.database.repositories.run import RunRepository
+from infrastructure.database.repositories.user import UserRepository
 from infrastructure.database.staging_loader import StagingLoader
 from infrastructure.external_databases.postgres_client import PostgresClient
 from settings import settings
@@ -36,6 +45,30 @@ def get_data_source_repository(
     session: AsyncSession = Depends(get_session)
 ) -> DataSourceRepository:
     return DataSourceRepository(session)
+
+
+def get_user_service(
+    session: AsyncSession = Depends(get_session),
+) -> UserService:
+    return UserService(UserRepository(session))
+
+
+async def get_current_user(
+    token: str | None = Depends(APIKeyCookie(name="user_access_token", auto_error=False)),
+    service: UserService = Depends(get_user_service),
+) -> CurrentUserDTO:
+    try:
+        return await service.get_current_user(token)
+    except (InvalidTokenException, TokenIsMissingException) as exc:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=str(exc),
+        ) from exc
+    except UserDoesNotExistException as exc:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(exc),
+        ) from exc
 
 
 def get_rule_repository(
