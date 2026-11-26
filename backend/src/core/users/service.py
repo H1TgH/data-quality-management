@@ -61,7 +61,7 @@ class UserService:
 
         return self._create_token(
             {"sub": str(user_id), "type": "access"},
-            timedelta(minutes=settings.auth.access_ttl),
+            timedelta(minutes=settings.security.access_ttl),
         )
 
     async def get_current_user(self, access_token: str | None) -> CurrentUserDTO:
@@ -100,11 +100,11 @@ class UserService:
         return TokensDTO(
             access_token=self._create_token(
                 {"sub": user_id, "type": "access"},
-                timedelta(minutes=settings.auth.access_ttl),
+                timedelta(minutes=settings.security.access_ttl),
             ),
             refresh_token=self._create_token(
                 {"sub": user_id, "type": "refresh"},
-                timedelta(days=settings.auth.refresh_ttl),
+                timedelta(days=settings.security.refresh_ttl),
             ),
         )
 
@@ -114,8 +114,8 @@ class UserService:
         payload["exp"] = datetime.now(UTC) + expires_delta
         return jwt.encode(
             payload,
-            settings.auth.secret_key.get_secret_value(),
-            settings.auth.algorithm,
+            settings.security.secret_key.get_secret_value(),
+            settings.security.algorithm.get_secret_value(),
         )
 
     @classmethod
@@ -130,8 +130,8 @@ class UserService:
         try:
             payload = jwt.decode(
                 token,
-                settings.auth.secret_key.get_secret_value(),
-                algorithms=[settings.auth.algorithm],
+                settings.security.secret_key.get_secret_value(),
+                algorithms=settings.security.algorithm.get_secret_value(),
             )
         except ExpiredSignatureError as exc:
             raise InvalidTokenException("Срок действия токена истёк") from exc

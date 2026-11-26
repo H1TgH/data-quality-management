@@ -37,13 +37,9 @@ class ProjectService:
                 f"Таблица {table_full_name} не найдена в источнике данных"
             )
 
-        project_name = data.name or table_full_name
-        return await self.project_repo.create(
-            data_source_id=data.data_source_id,
-            name=project_name,
-            schema_name=data.schema_name,
-            table_name=data.table_name,
-        )
+        if not data.name:
+            data.name = table_full_name
+        return await self.project_repo.create(data)
 
     async def create_file_project(
         self,

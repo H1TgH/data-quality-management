@@ -12,8 +12,12 @@ asyncpg==0.31.0
     # via data-quality-management
 bcrypt==5.0.0
     # via data-quality-management
+cffi==2.1.1 ; platform_python_implementation != 'PyPy'
+    # via cryptography
 click==8.5.0
     # via uvicorn
+cryptography==50.0.2
+    # via data-quality-management
 dnspython==2.9.2
     # via email-validator
 ecdsa==0.19.2
@@ -40,6 +44,8 @@ pyasn1==0.6.5
     # via
     #   python-jose
     #   rsa
+pycparser==3.12 ; implementation_name != 'PyPy' and platform_python_implementation != 'PyPy'
+    # via cffi
 pydantic==2.12.5
     # via
     #   data-quality-management

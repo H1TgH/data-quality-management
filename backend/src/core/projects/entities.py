@@ -4,6 +4,7 @@ from datetime import datetime
 
 @dataclass
 class ProjectCreationDTO:
+    user_id: str
     data_source_id: str
     schema_name: str
     table_name: str

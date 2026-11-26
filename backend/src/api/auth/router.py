@@ -18,14 +18,14 @@ def _set_auth_cookies(response: Response, access_token: str, refresh_token: str)
     response.set_cookie(
         "user_access_token",
         access_token,
-        max_age=settings.auth.access_ttl * 60,
+        max_age=settings.security.access_ttl * 60,
         httponly=True,
         samesite="lax",
     )
     response.set_cookie(
         "user_refresh_token",
         refresh_token,
-        max_age=settings.auth.refresh_ttl * 24 * 60 * 60,
+        max_age=settings.security.refresh_ttl * 24 * 60 * 60,
         httponly=True,
         samesite="lax",
     )
@@ -76,7 +76,7 @@ async def refresh_access_token(
     response.set_cookie(
         "user_access_token",
         access_token,
-        max_age=settings.auth.access_ttl * 60,
+        max_age=settings.security.access_ttl * 60,
         httponly=True,
         samesite="lax",
     )

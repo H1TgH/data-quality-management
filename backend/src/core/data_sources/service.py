@@ -10,6 +10,7 @@ from core.data_sources.exceptions import (
 )
 from infrastructure.database.repositories.data_source import DataSourceRepository
 from infrastructure.external_databases.postgres_client import PostgresClient
+from infrastructure.security.security import security_instance
 
 
 class DataSourceService:
@@ -29,6 +30,8 @@ class DataSourceService:
             password=data.password,
         )
 
+        encrypted_password = security_instance.encrypt(data.password)
+        data.password = encrypted_password  # TODO подумать над проблемой мутации дто
         return await self.data_source_repo.create(data)
 
     async def create_file(
@@ -50,7 +53,6 @@ class DataSourceService:
         source_id: str
     ) -> DataSourceTablesResponseDTO:
         creds = await self.get_data_source_creds(source_id)
-
         tables = await self.external_client.get_tables(
             timeout=5,
             **asdict(creds)
@@ -77,10 +79,12 @@ class DataSourceService:
                 f"Источник данных с id: {source_id} не найден"
             )
 
+        decrypted_password = security_instance.decrypt(creds.password_encrypted)
+
         return DataSourceCredsDTO(
-                host=creds.host,
-                port=creds.port,
-                db_name=creds.db_name,
-                user=creds.username,
-                password=creds.password_encrypted
-            )
+            host=creds.host,
+            port=creds.port,
+            db_name=creds.db_name,
+            user=creds.username,
+            password=decrypted_password,
+        )
