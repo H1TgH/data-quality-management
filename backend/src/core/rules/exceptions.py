@@ -1,2 +1,2 @@
 class RuleNotFoundException(Exception):
-    """Rule not found"""
+    """Правило не найдено."""

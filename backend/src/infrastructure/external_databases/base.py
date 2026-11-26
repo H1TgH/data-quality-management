@@ -14,15 +14,15 @@ class BaseExternalDBClient(ABC):
         password: str,
         timeout: int,
     ) -> None:
-        """Establish connection to external database."""
+        """Установка соединения с внешней базой."""
         ...
 
     @abstractmethod
     async def get_tables(self) -> list[DataSourceTablesDTO]:
-        """Return a list of tables from the connected database."""
+        """Возвращает список таблиц из подключенной бд."""
         ...
 
     @abstractmethod
     async def close(self) -> None:
-        """Close database connection."""
+        """Закрывает подключение с бд."""
         ...

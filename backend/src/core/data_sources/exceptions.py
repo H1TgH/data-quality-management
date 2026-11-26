@@ -1,54 +1,54 @@
 class DataSourceException(Exception):
-    """Base exception for data source exceptions."""
+    """Базовое исключение для источников данных."""
 
 
 class DataSourceConnectionException(DataSourceException):
-    """Base exception for connection exceptions."""
+    """Базовое исключение для ошибок подключения."""
 
 
 class DataSourceNetworkException(DataSourceConnectionException):
-    """Network-related connection exception."""
+    """Сетевое ошибка при подключении."""
 
 
 class DataSourceUnavailableException(DataSourceConnectionException):
-    """Database server is temporarily unavailable."""
+    """База данных недоступна."""
 
 
 class DataSourceTimeoutException(DataSourceConnectionException):
-    """Connection attempt timed out."""
+    """Превышение таймаута при попытке подлючения"""
 
 
 class DataSourceAuthException(DataSourceException):
-    """Authentication failed."""
+    """Ошибка аутентификации при подключении."""
 
 
 class DataSourceConfigurationException(DataSourceException):
-    """Invalid database configuration."""
+    """Некорректная конфигурация подлключения."""
 
 
 class DataSourceNotFoundException(DataSourceException):
-    """Data source not found."""
+    """Источник данных не найден."""
 
 
 class FileDataSourceException(Exception):
-    """Базовый класс ошибок загрузки файла."""
+    """Базовое исключение ошибок загрузки файла."""
 
 
 class UnsupportedFileFormatException(FileDataSourceException):
-    pass
+    """Неподдерживаемый формат загружаемого файла."""
 
 
 class FileTooLargeException(FileDataSourceException):
-    pass
+    """Превышен допустимый размер загружаемого файла."""
 
 
 class TooManyRowsException(FileDataSourceException):
-    pass
+    """Превышено количество максимального количества строк в файле."""
 
 
 class EmptyFileException(FileDataSourceException):
-    pass
+    """Загружен пустой файл."""
 
 
 class FileParsingException(FileDataSourceException):
-    pass
+    """Ошибка при попытки прочитать файл."""

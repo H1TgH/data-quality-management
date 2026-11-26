@@ -1,2 +1,2 @@
 class ProjectNotFoundException(Exception):
-    pass
+    """Проект не найден."""

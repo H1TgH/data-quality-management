@@ -1,18 +1,18 @@
 class UserAlreadyExistsException(Exception):
-    pass
+    """Пользователь уже существует."""
 
 
 class InvalidCredentialsException(Exception):
-    pass
+    """Некорректные данные для входа."""
 
 
 class InvalidTokenException(Exception):
-    pass
+    """Некорректный JWT токен."""
 
 
 class TokenIsMissingException(Exception):
-    pass
+    """JWT токен отсутвует."""
 
 
 class UserDoesNotExistException(Exception):
-    pass
+    """Пользователь не существует."""
