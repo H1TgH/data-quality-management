@@ -14,6 +14,7 @@ class ProjectCreationDTO:
 @dataclass
 class ProjectReadDTO:
     id: str
+    user_id: str
     data_source_id: str
     name: str
     schema_name: str | None

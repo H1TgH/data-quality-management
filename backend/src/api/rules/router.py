@@ -1,6 +1,6 @@
-from fastapi import APIRouter, Depends, Response, status
+from fastapi import APIRouter, Depends, status
 
-from api.dependencies import get_rule_service
+from api.dependencies import get_current_user, get_rule_service
 from api.rules.decorators import handle_rule_exceptions
 from api.rules.schemas import (
     RuleCreationSchema,
@@ -10,6 +10,7 @@ from api.rules.schemas import (
 )
 from core.rules.entities import RuleCreationDTO
 from core.rules.service import RuleService
+from core.users.entities import CurrentUserDTO
 
 
 router = APIRouter(
@@ -26,13 +27,15 @@ router = APIRouter(
 async def create_rule(
     project_id: str,
     data: RuleCreationSchema,
+    current_user: CurrentUserDTO = Depends(get_current_user),
     service: RuleService = Depends(get_rule_service)
 ):
     rule_id = await service.create_rule(
         RuleCreationDTO(
             project_id=project_id,
             **data.model_dump()
-        )
+        ),
+        user_id=current_user.id,
     )
 
     return {
@@ -47,9 +50,10 @@ async def create_rule(
 @handle_rule_exceptions
 async def get_rules(
     project_id: str,
+    current_user: CurrentUserDTO = Depends(get_current_user),
     service: RuleService = Depends(get_rule_service),
 ):
-    return await service.get_rules_list(project_id)
+    return await service.get_rules_list(project_id, current_user.id)
 
 
 @router.get(
@@ -60,9 +64,10 @@ async def get_rules(
 async def get_rule(
     project_id: str,
     rule_id: str,
+    current_user: CurrentUserDTO = Depends(get_current_user),
     service: RuleService = Depends(get_rule_service),
 ):
-    rule = await service.get_rule(project_id, rule_id)
+    rule = await service.get_rule(project_id, rule_id, current_user.id)
 
     return rule
 
@@ -76,6 +81,7 @@ async def update_rule(
     project_id: str,
     rule_id: str,
     data: RuleCreationSchema,
+    current_user: CurrentUserDTO = Depends(get_current_user),
     service: RuleService = Depends(get_rule_service),
 ):
     return await service.update_rule(
@@ -85,6 +91,7 @@ async def update_rule(
             project_id=project_id,
             **data.model_dump()
         ),
+        user_id=current_user.id,
     )
 
 
@@ -97,12 +104,14 @@ async def set_rule_is_active(
     project_id: str,
     rule_id: str,
     data: RuleIsActiveSchema,
+    current_user: CurrentUserDTO = Depends(get_current_user),
     service: RuleService = Depends(get_rule_service),
 ):
     return await service.set_rule_is_active(
         project_id=project_id,
         rule_id=rule_id,
         is_active=data.is_active,
+        user_id=current_user.id,
     )
 
 
@@ -114,6 +123,7 @@ async def set_rule_is_active(
 async def delete_rule(
     project_id: str,
     rule_id: str,
+    current_user: CurrentUserDTO = Depends(get_current_user),
     service: RuleService = Depends(get_rule_service),
 ):
-    await service.delete_rule(project_id, rule_id)
+    await service.delete_rule(project_id, rule_id, current_user.id)

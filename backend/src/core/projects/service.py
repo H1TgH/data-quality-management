@@ -19,7 +19,10 @@ class ProjectService:
         self,
         data: ProjectCreationDTO
     ) -> str:
-        data_source_type = await self.data_source_service.get_data_source_type(data.data_source_id)
+        data_source_type = await self.data_source_service.get_data_source_type(
+            data.data_source_id,
+            data.user_id,
+        )
         if data_source_type is None:
             raise DataSourceNotFoundException(
                 f"Источник данных с id: {data.data_source_id} не найден"
@@ -30,7 +33,7 @@ class ProjectService:
                 "Выбрать таблицу можно только для источника типа БД"
             )
 
-        tables = await self.data_source_service.get_tables(data.data_source_id)
+        tables = await self.data_source_service.get_tables(data.data_source_id, data.user_id)
         table_full_name = f"{data.schema_name}.{data.table_name}"
         if table_full_name not in tables.tables_full_name:
             raise DataSourceConfigurationException(
@@ -44,10 +47,11 @@ class ProjectService:
     async def create_file_project(
         self,
         data_source_id: str,
+        user_id: str,
         name: str,
         table_name: str,
     ) -> str:
-        data_source_type = await self.data_source_service.get_data_source_type(data_source_id)
+        data_source_type = await self.data_source_service.get_data_source_type(data_source_id, user_id)
         if data_source_type is None:
             raise DataSourceNotFoundException(
                 f"Источник данных с id: {data_source_id} не найден"
@@ -58,28 +62,30 @@ class ProjectService:
                 "Файловый проект можно создать только для источника типа файл"
             )
 
-        return await self.project_repo.create(
+        return await self.project_repo.create(ProjectCreationDTO(
+            user_id=user_id,
             data_source_id=data_source_id,
             name=name,
             schema_name="staging",
             table_name=table_name,
-        )
+        ))
 
-    async def get_project(self, project_id: str) -> ProjectReadDTO:
-        project = await self.project_repo.get_by_id(project_id)
+    async def get_project(self, project_id: str, user_id: str) -> ProjectReadDTO:
+        project = await self.project_repo.get_by_id(project_id, user_id)
         if project is None:
             raise ProjectNotFoundException(f"Проект с id: {project_id} не найден")
 
         return ProjectReadDTO(
             id=str(project.id),
+            user_id=str(project.user_id),
             data_source_id=str(project.data_source_id),
             name=project.name,
             schema_name=project.schema_name,
             table_name=project.table_name,
         )
 
-    async def get_projects_list(self) -> list[ProjectListItemDTO]:
-        projects = await self.project_repo.get_projects_list()
+    async def get_projects_list(self, user_id: str) -> list[ProjectListItemDTO]:
+        projects = await self.project_repo.get_projects_list(user_id)
 
         return [
             ProjectListItemDTO(

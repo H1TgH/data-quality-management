@@ -38,6 +38,7 @@ class FileDataSourceService:
         self,
         filename: str,
         chunks: AsyncIterator[bytes],
+        user_id: str,
     ) -> FileSourceDTO:
         file_name = Path(filename).name
         file_format = Path(file_name).suffix.lower().lstrip(".")
@@ -52,7 +53,7 @@ class FileDataSourceService:
 
         try:
             size = await self._save_to_disk(tmp_path, chunks)
-            return await self._load_file(tmp_path, file_name, file_format, size)
+            return await self._load_file(tmp_path, file_name, file_format, size, user_id)
         finally:
             Path(tmp_path).unlink(missing_ok=True)
 
@@ -75,6 +76,7 @@ class FileDataSourceService:
         file_name: str,
         file_format: str,
         size: int,
+        user_id: str,
     ) -> FileSourceDTO:
         source_id = str(uuid4())
         table_name = staging_table_name(source_id)
@@ -95,12 +97,14 @@ class FileDataSourceService:
             name = Path(file_name).stem
             await self.data_source_service.create_file(
                 source_id=source_id,
+                user_id=user_id,
                 file_name=file_name,
                 file_size_bytes=size,
                 file_format=file_format,
             )
             project_id = await self.project_service.create_file_project(
                 data_source_id=source_id,
+                user_id=user_id,
                 name=name[:1].upper() + name[1:],
                 table_name=table_name,
             )

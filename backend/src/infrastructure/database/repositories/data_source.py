@@ -19,8 +19,12 @@ class DataSourceRepository:
     ) -> str:
         id = uuid4()
         query = text("""
-            INSERT INTO data_sources (id, type, host, port, db_name, username, password_encrypted)
-            VALUES (:id, :type, :host, :port, :db_name, :username, :password)
+            INSERT INTO data_sources (
+                id, user_id, type, host, port, db_name, username, password_encrypted
+            )
+            VALUES (
+                :id, :user_id, :type, :host, :port, :db_name, :username, :password
+            )
             RETURNING id
         """)
 
@@ -28,6 +32,7 @@ class DataSourceRepository:
             query,
             {
                 "id": id,
+                "user_id": UUID(data_sources_creation_dto.user_id),
                 "type": data_sources_creation_dto.type,
                 "host": data_sources_creation_dto.host,
                 "port": data_sources_creation_dto.port,
@@ -40,59 +45,62 @@ class DataSourceRepository:
 
     async def get_data_source_creds(
         self,
-        source_id: str
+        source_id: str,
+        user_id: str,
     ) -> Row | None:
         query = text("""
             SELECT host, port, db_name, username, password_encrypted
             FROM data_sources
-            WHERE id = :source_id
+            WHERE id = :source_id AND user_id = :user_id
         """)
 
         result = await self.session.execute(
             query,
-            {"source_id": source_id}
+            {"source_id": UUID(source_id), "user_id": UUID(user_id)}
         )
         return result.one_or_none()
 
     async def create_file(
         self,
         source_id: str,
+        user_id: str,
         file_name: str,
         file_size_bytes: int,
         file_format: str,
     ) -> None:
         await self.session.execute(
             text("""
-                INSERT INTO data_sources (id, type, file_name, file_size_bytes, file_format)
-                VALUES (:id, 'FILE', :file_name, :file_size_bytes, :file_format)
+                INSERT INTO data_sources (id, user_id, type, file_name, file_size_bytes, file_format)
+                VALUES (:id, :user_id, 'FILE', :file_name, :file_size_bytes, :file_format)
             """),
             {
                 "id": UUID(source_id),
+                "user_id": UUID(user_id),
                 "file_name": file_name,
                 "file_size_bytes": file_size_bytes,
                 "file_format": file_format,
             },
         )
 
-    async def get_by_id(self, source_id: str):
+    async def get_by_id(self, source_id: str, user_id: str):
         result = await self.session.execute(
             text("""
-                SELECT id, type, file_name, file_size_bytes, file_format
+                SELECT id, user_id, type, file_name, file_size_bytes, file_format
                 FROM data_sources
-                WHERE id = :id
+                WHERE id = :id AND user_id = :user_id
             """),
-            {"id": UUID(source_id)},
+            {"id": UUID(source_id), "user_id": UUID(user_id)},
         )
         return result.mappings().first()
 
-    async def get_data_source_type(self, source_id: str) -> str | None:
+    async def get_data_source_type(self, source_id: str, user_id: str) -> str | None:
         result = await self.session.execute(
             text("""
                 SELECT type
                 FROM data_sources
-                WHERE id = :id
+                WHERE id = :id AND user_id = :user_id
             """),
-            {"id": UUID(source_id)},
+            {"id": UUID(source_id), "user_id": UUID(user_id)},
         )
         data_source_type = result.scalar_one_or_none()
         if data_source_type is None:

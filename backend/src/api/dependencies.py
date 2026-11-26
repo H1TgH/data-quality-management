@@ -54,7 +54,7 @@ def get_user_service(
 
 
 async def get_current_user(
-    token: str = Depends(APIKeyCookie(name="user_access_token")),
+    token: str | None = Depends(APIKeyCookie(name="user_access_token", auto_error=False)),
     service: UserService = Depends(get_user_service)
 ) -> CurrentUserDTO:
     try:

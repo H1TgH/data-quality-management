@@ -4,11 +4,12 @@ from fastapi import APIRouter, Depends, File, UploadFile, status
 
 from api.data_source.decorators import handle_data_source_exceptions
 from api.data_source.schemas import DataSourceCreationSchema, DataSourceTablesResponseSchema, FileUploadResponseSchema
-from api.dependencies import get_data_source_service, get_file_data_source_service
+from api.dependencies import get_current_user, get_data_source_service, get_file_data_source_service
 from core.data_sources.entities import DataSourceCreationDTO
 from core.data_sources.enums import DataSourceTypeEnum
 from core.data_sources.file_service import FileDataSourceService
 from core.data_sources.service import DataSourceService
+from core.users.entities import CurrentUserDTO
 
 
 router = APIRouter(
@@ -29,10 +30,12 @@ async def _iter_chunks(file: UploadFile, size: int = 1024 * 1024):
 @handle_data_source_exceptions
 async def create_data_sources(
     data: DataSourceCreationSchema,
+    current_user: CurrentUserDTO = Depends(get_current_user),
     service: DataSourceService = Depends(get_data_source_service)
 ):
     source_id = await service.create(
         DataSourceCreationDTO(
+            user_id=current_user.id,
             type=DataSourceTypeEnum.DB,
             **data.model_dump()
         )
@@ -51,9 +54,10 @@ async def create_data_sources(
 @handle_data_source_exceptions
 async def get_tables(
     source_id: str,
+    current_user: CurrentUserDTO = Depends(get_current_user),
     service: DataSourceService = Depends(get_data_source_service)
 ):
-    return await service.get_tables(source_id)
+    return await service.get_tables(source_id, current_user.id)
 
 
 @router.post(
@@ -64,10 +68,12 @@ async def get_tables(
 @handle_data_source_exceptions
 async def upload_file(
     file: UploadFile = File(...),
+    current_user: CurrentUserDTO = Depends(get_current_user),
     service: FileDataSourceService = Depends(get_file_data_source_service),
 ):
     result = await service.upload(
         filename=file.filename or "",
         chunks=_iter_chunks(file),
+        user_id=current_user.id,
     )
     return FileUploadResponseSchema(**asdict(result))

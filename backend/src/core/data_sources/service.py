@@ -6,6 +6,7 @@ from core.data_sources.entities import (
     DataSourceTablesResponseDTO,
 )
 from core.data_sources.exceptions import (
+    DataSourceConfigurationException,
     DataSourceNotFoundException,
 )
 from infrastructure.database.repositories.data_source import DataSourceRepository
@@ -37,12 +38,14 @@ class DataSourceService:
     async def create_file(
         self,
         source_id: str,
+        user_id: str,
         file_name: str,
         file_size_bytes: int,
         file_format: str,
     ) -> None:
         await self.data_source_repo.create_file(
             source_id=source_id,
+            user_id=user_id,
             file_name=file_name,
             file_size_bytes=file_size_bytes,
             file_format=file_format,
@@ -50,9 +53,10 @@ class DataSourceService:
 
     async def get_tables(
         self,
-        source_id: str
+        source_id: str,
+        user_id: str,
     ) -> DataSourceTablesResponseDTO:
-        creds = await self.get_data_source_creds(source_id)
+        creds = await self.get_data_source_creds(source_id, user_id)
         tables = await self.external_client.get_tables(
             timeout=5,
             **asdict(creds)
@@ -66,17 +70,22 @@ class DataSourceService:
             total=len(tables)
         )
 
-    async def get_data_source_type(self, source_id: str) -> str | None:
-        return await self.data_source_repo.get_data_source_type(source_id)
+    async def get_data_source_type(self, source_id: str, user_id: str) -> str | None:
+        return await self.data_source_repo.get_data_source_type(source_id, user_id)
 
     async def get_data_source_creds(
         self,
-        source_id: str
+        source_id: str,
+        user_id: str,
     ) -> DataSourceCredsDTO:
-        creds = await self.data_source_repo.get_data_source_creds(source_id)
+        creds = await self.data_source_repo.get_data_source_creds(source_id, user_id)
         if creds is None:
             raise DataSourceNotFoundException(
                 f"Источник данных с id: {source_id} не найден"
+            )
+        if creds.password_encrypted is None:
+            raise DataSourceConfigurationException(
+                "У источника нет реквизитов подключения к базе данных"
             )
 
         decrypted_password = security_instance.decrypt(creds.password_encrypted)

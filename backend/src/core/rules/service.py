@@ -17,9 +17,10 @@ class RuleService:
 
     async def create_rule(
         self,
-        rule_data: RuleCreationDTO
+        rule_data: RuleCreationDTO,
+        user_id: str,
     ) -> str:
-        await self._get_project_or_raise(rule_data.project_id)
+        await self._get_project_or_raise(rule_data.project_id, user_id)
 
         await self._validate_rule(rule_data)
 
@@ -28,9 +29,10 @@ class RuleService:
 
     async def get_rules_list(
         self,
-        project_id: str
+        project_id: str,
+        user_id: str,
     ) -> RulesListResponseDTO:  # TODO добавить пагинацию
-        await self._get_project_or_raise(project_id)
+        await self._get_project_or_raise(project_id, user_id)
 
         rules = await self.rule_repo.get_rules_list(project_id)
 
@@ -45,9 +47,10 @@ class RuleService:
     async def get_rule(
         self,
         project_id: str,
-        rule_id: str
+        rule_id: str,
+        user_id: str,
     ) -> RuleReadDTO | None:
-        await self._get_project_or_raise(project_id)
+        await self._get_project_or_raise(project_id, user_id)
 
         rule = await self._get_rule_or_raise(project_id, rule_id)
 
@@ -57,9 +60,10 @@ class RuleService:
         self,
         project_id: str,
         rule_id: str,
-        rule_data: RuleCreationDTO
+        rule_data: RuleCreationDTO,
+        user_id: str,
     ) -> RuleReadDTO:
-        await self._get_project_or_raise(project_id)
+        await self._get_project_or_raise(project_id, user_id)
 
         await self._validate_rule(rule_data)
 
@@ -72,9 +76,10 @@ class RuleService:
     async def delete_rule(
         self,
         project_id: str,
-        rule_id: str
+        rule_id: str,
+        user_id: str,
     ) -> None:
-        await self._get_project_or_raise(project_id)
+        await self._get_project_or_raise(project_id, user_id)
 
         rule_is_deleted = await self.rule_repo.delete_rule(project_id, rule_id)
         if not rule_is_deleted:
@@ -84,9 +89,10 @@ class RuleService:
         self,
         project_id: str,
         rule_id: str,
-        is_active: bool
+        is_active: bool,
+        user_id: str,
     ) -> RuleReadDTO:
-        await self._get_project_or_raise(project_id)
+        await self._get_project_or_raise(project_id, user_id)
 
         rule = await self.rule_repo.set_rule_is_active(project_id, rule_id, is_active)
         if not rule:
@@ -96,9 +102,10 @@ class RuleService:
 
     async def _get_project_or_raise(
         self,
-        project_id: str
+        project_id: str,
+        user_id: str,
     ) -> None:
-        await self.project_service.get_project(project_id)
+        await self.project_service.get_project(project_id, user_id)
 
     async def _get_rule_or_raise(
         self,

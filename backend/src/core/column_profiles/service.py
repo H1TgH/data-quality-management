@@ -28,14 +28,15 @@ class ColumnProfileService:
         source_id: str,
         schema: str,
         table_name: str,
+        user_id: str,
     ) -> TableProfileDTO:
-        source_type = await self.data_source_service.get_data_source_type(source_id)
+        source_type = await self.data_source_service.get_data_source_type(source_id, user_id)
         if source_type != DataSourceTypeEnum.DB:
             raise DataSourceNotFoundException(
                 f"Источник данных с id: {source_id} типа БД не найден"
             )
 
-        creds = await self.data_source_service.get_data_source_creds(source_id)
+        creds = await self.data_source_service.get_data_source_creds(source_id, user_id)
 
         columns, statistics = await self.external_client.profile_table(
             **asdict(creds),
@@ -67,8 +68,8 @@ class ColumnProfileService:
             columns=profiles,
         )
 
-    async def profile_file(self, source_id: str) -> TableProfileDTO:
-        source_type = await self.data_source_service.get_data_source_type(source_id)
+    async def profile_file(self, source_id: str, user_id: str) -> TableProfileDTO:
+        source_type = await self.data_source_service.get_data_source_type(source_id, user_id)
         if source_type != DataSourceTypeEnum.FILE:
             raise DataSourceNotFoundException(
                 f"Файловый источник с id: {source_id} не найден"

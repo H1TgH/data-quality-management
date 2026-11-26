@@ -1,7 +1,6 @@
 import json
 from dataclasses import asdict
 from typing import Any
-from uuid import uuid4
 
 from core.data_sources.entities import DataSourceCredsDTO
 from core.data_sources.enums import DataSourceTypeEnum
@@ -39,12 +38,12 @@ class RunService:
         self.pg_client = postgres_client
         self.staging_credentials = staging_credentials
 
-    async def run_check(self, project_id: str) -> dict[str, Any]:
-        project = await self.project_service.get_project(project_id)
-        rules_response = await self.rule_service.get_rules_list(project_id)
+    async def run_check(self, project_id: str, user_id: str) -> dict[str, Any]:
+        project = await self.project_service.get_project(project_id, user_id)
+        rules_response = await self.rule_service.get_rules_list(project_id, user_id)
         active_rules = self._keep_active_rules(rules_response.items)
 
-        connection_params = await self._get_connection_params(project.data_source_id)
+        connection_params = await self._get_connection_params(project.data_source_id, user_id)
         table_name = self._get_table_name(project.schema_name, project.table_name)
         conditions = self._build_check_conditions(table_name, active_rules)
 
@@ -122,8 +121,8 @@ class RunService:
         finally:
             await connection.close()
 
-    async def _get_connection_params(self, data_source_id: str) -> dict[str, Any]:
-        data_source_type = await self.data_source_service.get_data_source_type(data_source_id)
+    async def _get_connection_params(self, data_source_id: str, user_id: str) -> dict[str, Any]:
+        data_source_type = await self.data_source_service.get_data_source_type(data_source_id, user_id)
         if data_source_type == DataSourceTypeEnum.FILE:
             return asdict(self.staging_credentials)
 
@@ -132,7 +131,7 @@ class RunService:
                 f"Источник данных с id: {data_source_id} не найден"
             )
 
-        credentials = await self.data_source_service.get_data_source_creds(data_source_id)
+        credentials = await self.data_source_service.get_data_source_creds(data_source_id, user_id)
         return asdict(credentials)
 
     def _build_check_conditions(

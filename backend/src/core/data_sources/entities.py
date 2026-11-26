@@ -5,6 +5,7 @@ from core.data_sources.enums import DataSourceTypeEnum
 
 @dataclass
 class DataSourceCreationDTO:
+    user_id: str
     type: DataSourceTypeEnum
     host: str
     port: int

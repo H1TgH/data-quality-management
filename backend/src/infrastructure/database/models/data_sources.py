@@ -1,7 +1,7 @@
 from datetime import datetime
 from uuid import uuid4
 
-from sqlalchemy import BigInteger, DateTime as PGDateTime, Integer, String, func
+from sqlalchemy import BigInteger, DateTime as PGDateTime, ForeignKey, Integer, String, func
 from sqlalchemy.dialects.postgresql import ENUM, UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -16,6 +16,13 @@ class DataSourceModel(Base):
         UUID(as_uuid=False),
         primary_key=True,
         default=lambda: str(uuid4())
+    )
+
+    user_id: Mapped[str | None] = mapped_column(
+        UUID(as_uuid=False),
+        ForeignKey("users.id", ondelete="RESTRICT"),
+        nullable=True,
+        index=True,
     )
 
     type: Mapped[DataSourceTypeEnum] = mapped_column(

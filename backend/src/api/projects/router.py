@@ -1,16 +1,11 @@
 from fastapi import APIRouter, Depends, status
 
 from api.data_source.decorators import handle_data_source_exceptions
-from core.users.entities import CurrentUserDTO
-from api.dependencies import get_project_service
-from api.projects.schemas import (
-    ProjectCreationResponseSchema,
-    ProjectCreationSchema,
-    ProjectListItemSchema,
-)
+from api.dependencies import get_current_user, get_project_service
+from api.projects.schemas import ProjectCreationResponseSchema, ProjectCreationSchema, ProjectListItemSchema
 from core.projects.entities import ProjectCreationDTO
 from core.projects.service import ProjectService
-from api.dependencies import get_current_user
+from core.users.entities import CurrentUserDTO
 
 
 router = APIRouter(
@@ -47,6 +42,7 @@ async def create_project(
     response_model=list[ProjectListItemSchema],
 )
 async def get_projects(
+    current_user: CurrentUserDTO = Depends(get_current_user),
     service: ProjectService = Depends(get_project_service),
 ):
-    return await service.get_projects_list()
+    return await service.get_projects_list(current_user.id)

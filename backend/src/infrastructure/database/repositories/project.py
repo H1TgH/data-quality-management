@@ -1,9 +1,9 @@
 from uuid import UUID, uuid4
 
-from core.projects.entities import ProjectCreationDTO
-
 from sqlalchemy import Row, text
 from sqlalchemy.ext.asyncio import AsyncSession
+
+from core.projects.entities import ProjectCreationDTO
 
 
 class ProjectRepository:
@@ -31,18 +31,18 @@ class ProjectRepository:
         )
         return str(project_id)
 
-    async def get_by_id(self, project_id: str) -> Row | None:
+    async def get_by_id(self, project_id: str, user_id: str) -> Row | None:
         result = await self.session.execute(
             text("""
-                SELECT id, data_source_id, name, schema_name, table_name
+                SELECT id, user_id, data_source_id, name, schema_name, table_name
                 FROM projects
-                WHERE id = :project_id
+                WHERE id = :project_id AND user_id = :user_id
             """),
-            {"project_id": UUID(project_id)},
+            {"project_id": UUID(project_id), "user_id": UUID(user_id)},
         )
         return result.one_or_none()
 
-    async def get_projects_list(self) -> list[Row]:
+    async def get_projects_list(self, user_id: str) -> list[Row]:
         result = await self.session.execute(
             text("""
                 SELECT
@@ -61,6 +61,7 @@ class ProjectRepository:
                 FROM projects
                 JOIN data_sources
                     ON data_sources.id = projects.data_source_id
+                    AND data_sources.user_id = projects.user_id
                 LEFT JOIN runs AS latest_run
                     ON latest_run.id = (
                         SELECT runs.id
@@ -69,6 +70,7 @@ class ProjectRepository:
                         ORDER BY runs.started_at DESC, runs.id DESC
                         LIMIT 1
                     )
+                WHERE projects.user_id = :user_id
                 ORDER BY projects.created_at DESC
-        """))
+        """), {"user_id": UUID(user_id)})
         return result.all()

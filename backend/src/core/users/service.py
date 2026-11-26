@@ -131,7 +131,7 @@ class UserService:
             payload = jwt.decode(
                 token,
                 settings.security.secret_key.get_secret_value(),
-                algorithms=settings.security.algorithm.get_secret_value(),
+                algorithms=[settings.security.algorithm.get_secret_value()],
             )
         except ExpiredSignatureError as exc:
             raise InvalidTokenException("Срок действия токена истёк") from exc
