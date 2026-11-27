@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Результаты проверки качества данных</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style_index.css">
+    <link rel="stylesheet" href="css/modal.css">
+    <link rel="stylesheet" href="css/results.css">
+</head>
+<body>
+<header class="header">
+        <div class="header-content">
+            <div class="logo-block">
+                <img class="img1" src="img/logo.png" alt="logo">
+                <span class="site-title">Data Quality Dashboard</span>
+            </div>
+            <div class="h-c-2">
+                <div class="icons">
+                    <img class="img2" src="img/notifications.png" alt="notifications">
+                    <img class="img3" src="img/profile.png" alt="profile">
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <section class="content">
+        <aside class="menu-content">
+            <nav class="m-c-1">
+                <ul>
+                    <li id="project_portfolio" class="active"><img src="img/project_portfolio.png" alt=""><a href="index.html">Портфель Проектов</a></li>
+                    <li id="rule_settings"><img src="img/rule_settings.png" alt=""><a href="#">Настройки Правил</a></li>
+                </ul>
+            </nav>
+            <div class="m-c-2">
+                <img src="img/settings.png" alt=""><a href="#">Администрирование</a>
+            </div>
+        </aside>
+
+        <main class="main-content results">
+            <nav class="crumbs"><a href="index.html">Портфель проектов</a> / <span>Витрина заказов К-телеком</span></nav>
+            <div class="title-row">
+                <h1>Результаты проверки качества данных</h1>
+                <button class="btn run-btn" type="button" id="runBtn"></button>
+            </div>
+
+            <div class="rtabs">
+                <button class="rtab active" type="button" data-panel="results">Результаты проверки</button>
+                <button class="rtab" type="button" data-panel="trend">Тренд аналитика</button>
+                <span class="source" id="sourceName"></span>
+            </div>
+
+            <!-- Вкладка «Результаты проверки» -->
+            <section id="panel-results">
+                <div class="summary">
+                    <div class="box score-box"><span>Оценка качества</span><b class="pink">84,7%</b></div>
+                    <div class="mid">
+                        <div class="box"><div><span>Всего строк</span><small>Проверено 14 полей</small></div><b class="green">1 070</b></div>
+                        <div class="box red-box"><span>Очищено строк</span><b class="red">70</b></div>
+                    </div>
+                    <div class="box donut-box">
+                        <h3>Распределение ошибок по типам</h3>
+                        <div class="donut-wrap">
+                            <div class="donut" id="donut"><div><b id="donutTotal">153</b><small>ошибки</small></div></div>
+                            <ul class="legend" id="legend"></ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="errors">
+                    <div class="errors-head"><h2>Ошибки проверки</h2><button class="ghost small" type="button" id="editRules">Редактировать правила</button></div>
+                    <div class="err-row err-th"><span>Поле</span><span>Тип ошибки</span><span>Строки</span><span>Правило</span><span></span></div>
+                    <div id="errBody"></div>
+                </div>
+            </section>
+
+            <!-- Вкладка «Тренд аналитика» -->
+            <section id="panel-trend" hidden>
+                <select id="period" class="period" aria-label="Период"><option value="weeks">Недели</option><option value="months">Месяцы</option></select>
+                <div class="chart-card">
+                    <h2>Динамика качества данных</h2>
+                    <div id="chart"></div>
+                </div>
+            </section>
+
+            <div class="foot">
+                <span class="done" id="doneAt">Проверка завершена · 10 октября 2026, 09:15</span>
+                <div class="foot-btns">
+                    <button class="ghost" type="button" id="csvBtn">Скачать CSV</button>
+                    <button class="btn" type="button" id="publishBtn">Опубликовать в Clean Zone</button>
+                </div>
+            </div>
+        </main>
+    </section>
+
+    <!-- Загрузка новой версии файла (только xlsx) -->
+    <div class="modal-overlay" id="uploadModal" hidden>
+        <div class="modal" role="dialog" aria-modal="true" aria-label="Загрузка новой версии">
+            <button class="modal-close" type="button" id="upClose" aria-label="Закрыть"></button>
+            <div id="upStart">
+                <p class="msg error" id="upError" hidden>Не удалось загрузить файл!</p>
+                <label class="dropzone" id="upDrop" tabindex="0">
+                    <svg viewBox="0 0 64 80" width="70" height="86" aria-hidden="true"><rect x="2" y="2" width="60" height="76" rx="8" fill="#F3F3F3" stroke="#BDBDBD" stroke-width="3"/><rect x="12" y="12" width="40" height="10" fill="#BDBDBD"/><rect x="12" y="30" width="40" height="3" fill="#BDBDBD"/><rect x="12" y="40" width="40" height="3" fill="#BDBDBD"/></svg>
+                    <span>Перетащите CSV/XLSX файл сюда<br>или<br>нажмите для выбора</span>
+                    <input type="file" id="upInput" accept=".csv,.xlsx" hidden>
+                </label>
+            </div>
+            <div id="upOk" hidden>
+                <p class="msg ok" id="upOkText"></p>
+                <div class="file-row"><span id="upName"></span></div>
+                <div class="btn-row"><button class="btn" type="button" id="upRun">▷ Запустить проверку</button></div>
+            </div>
+        </div>
+    </div>
+    <div class="toast" id="toast" hidden></div>
+
+    <script src="js/results.js"></script>
+</body>
+</html>
