@@ -71,6 +71,53 @@ const projectsRules = {
 let currentKey = null;
 let currentCard = null;
 let working = [];
+let originalRules = [];
+let currentProjectId = new URLSearchParams(location.search).get('project_id');
+
+const API_TO_UI_TYPE = {
+    UNIQUENESS: 'duplicates', NOT_NULL: 'null', REGEX: 'validation',
+    DICTIONARY: 'dictionary', RANGE: 'range', CUSTOM_SQL: 'formula'
+};
+const UI_TO_API_TYPE = Object.fromEntries(Object.entries(API_TO_UI_TYPE).map(([api, ui]) => [ui, api]));
+
+function apiRuleToUi(rule) {
+    const type = API_TO_UI_TYPE[rule.rule_type] || 'validation';
+    const params = rule.params || {};
+    let uiParams = null;
+    if (type === 'validation') uiParams = params.value ?? params.pattern ?? params.regex ?? '';
+    if (type === 'dictionary') uiParams = params.values ?? params.allowed_values ?? [];
+    if (type === 'range') uiParams = { min: params.min ?? params.minimum ?? 0, max: params.max ?? params.maximum ?? 0 };
+    if (type === 'formula') uiParams = { op: '*', cmp: '=', target: (rule.target_columns || [])[0] || '' };
+    return {
+        id: rule.id,
+        name: rule.name,
+        type,
+        fields: rule.target_columns || [],
+        params: uiParams,
+        reaction: rule.action === 'AUTO_CLEAN' ? 'auto' : 'indication',
+        is_active: rule.is_active,
+        edited: false,
+        editing: false,
+    };
+}
+
+function uiRulePayload(rule) {
+    let params = {};
+    if (rule.type === 'validation') params = { value: rule.params || '' };
+    if (rule.type === 'dictionary') params = { values: rule.params || [] };
+    if (rule.type === 'range') params = rule.params || {};
+    if (rule.type === 'formula') {
+        params = { expression: `${rule.fields.join(` ${rule.params.op} `)} ${rule.params.cmp} ${rule.params.target}` };
+    }
+    return {
+        name: rule.name,
+        rule_type: UI_TO_API_TYPE[rule.type],
+        target_columns: rule.fields,
+        params,
+        action: rule.reaction === 'auto' ? 'AUTO_CLEAN' : 'INDICATE',
+        is_active: rule.is_active ?? true,
+    };
+}
 
 const overlay = document.getElementById('rulesOverlay');
 const rowsBox = document.getElementById('rulesRows');
@@ -285,6 +332,7 @@ function commitRow(row, rule) {
     rule.reaction = isCleanType(rule.type)
         ? 'indication'
         : row.querySelector('[data-role="reaction"]').value;
+    rule.edited = true;
 }
 
 /* ---------- построение строки ---------- */
@@ -370,10 +418,17 @@ function normalizeFormula(rule) {
 }
 
 /* ---------- открытие / закрытие ---------- */
-function openModal(key, card) {
+async function openModal(key, card) {
     currentKey = key;
     currentCard = card;
-    working = JSON.parse(JSON.stringify(projectsRules[key] || []));
+    try {
+        const response = await window.api.get(`/${currentProjectId}/rules/`);
+        originalRules = response.items || [];
+        working = originalRules.map(apiRuleToUi);
+    } catch (error) {
+        alert(`Не удалось загрузить правила: ${error.message}`);
+        return;
+    }
     working.forEach(r => {
         r.editing = false;
         normalizeFormula(r);
@@ -393,13 +448,61 @@ function updateCount() {
     if (cnt) cnt.textContent = 'Правил: ' + (projectsRules[currentKey] ? projectsRules[currentKey].length : 0);
 }
 
-document.querySelectorAll('.project-card').forEach(card => {
-    card.addEventListener('click', e => {
-        e.preventDefault();
-        const key = card.dataset.key || (card.querySelector('.project-card__table') || {}).textContent.trim();
-        openModal(key, card);
+function renderProjectCards(projects) {
+    const list = document.querySelector('.projects-list');
+    list.replaceChildren();
+    projects.forEach(project => {
+        const card = document.createElement('a');
+        card.href = '#';
+        card.className = 'project-card';
+        card.dataset.projectId = project.id;
+        const left = el('div', 'project-card__left');
+        const name = el('h3', 'project-card__name'); name.textContent = project.name;
+        const table = el('span', 'project-card__table'); table.textContent = project.source_name;
+        left.append(name, table);
+        const center = el('div', 'project-card__center');
+        const count = el('span', 'project-card__count'); count.textContent = 'Правил: …';
+        center.append(count);
+        const arrow = el('span', 'project-card__arrow'); arrow.textContent = '→';
+        card.append(left, center, arrow);
+        card.addEventListener('click', async event => {
+            event.preventDefault();
+            currentProjectId = project.id;
+            try {
+                const source = project.source_name;
+                const profile = source.match(/\.(csv|xls|xlsx)$/i)
+                    ? await window.api.get(`/column-profiles/${project.data_source_id}/file`)
+                    : await window.api.get(`/column-profiles/${project.data_source_id}/tables/${encodeURIComponent(project.schema_name)}/${encodeURIComponent(project.table_name)}`);
+                FIELDS[project.id] = profile.columns.map(column => column.column_name);
+                await openModal(project.id, card);
+            } catch (error) {
+                alert(`Не удалось загрузить профиль проекта: ${error.message}`);
+            }
+        });
+        list.append(card);
+        window.api.get(`/${project.id}/rules/`).then(response => {
+            count.textContent = `Правил: ${response.total}`;
+        }).catch(() => { count.textContent = 'Правил: —'; });
     });
-});
+}
+
+async function loadProjects() {
+    try {
+        const response = await window.api.get('/projects/');
+        let projects = response.items || [];
+        if (currentProjectId) projects = projects.filter(project => project.id === currentProjectId);
+        renderProjectCards(projects);
+        if (!projects.length) {
+            const message = document.createElement('p');
+            message.textContent = 'Нет доступных проектов.';
+            document.querySelector('.projects-list').append(message);
+        }
+    } catch (error) {
+        alert(`Не удалось загрузить проекты: ${error.message}`);
+    }
+}
+
+loadProjects();
 closeBtn.addEventListener('click', closeModal);
 overlay.addEventListener('mousedown', e => { if (e.target === overlay) closeModal(); });
 document.addEventListener('keydown', e => { if (e.key === 'Escape' && !overlay.hidden) closeModal(); });
@@ -412,24 +515,39 @@ document.addEventListener('click', () => {
 
 /* добавить правило — сразу в режиме конструктора */
 addBtn.addEventListener('click', () => {
-    working.push(R('Новое правило', 'validation', ['*'], '', 'indication'));
+    working.push(R('Новое правило', 'validation', [fieldList()[0] || '*'], '', 'indication'));
     working[working.length - 1].editing = true;
     render();
     rowsBox.lastElementChild.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
 });
 
 /* сохранить и применить */
-saveBtn.addEventListener('click', () => {
+saveBtn.addEventListener('click', async () => {
     rowsBox.querySelectorAll('.rule-row').forEach(rowEl => {
         const rule = working[+rowEl.dataset.idx];
         if (rule && rule.editing) commitRow(rowEl, rule);
     });
-    projectsRules[currentKey] = working.map(r => {
+    const updatedRules = working.map(r => {
         const c = Object.assign({}, r);
         delete c.editing;
         if (isCleanType(c.type)) c.reaction = 'indication';
         return c;
     });
-    updateCount();
-    closeModal();
+    try {
+        const currentIds = new Set(updatedRules.map(rule => rule.id).filter(Boolean));
+        for (const rule of originalRules) {
+            if (!currentIds.has(rule.id)) await window.api.delete(`/${currentProjectId}/rules/${rule.id}`);
+        }
+        for (const rule of updatedRules) {
+            if (rule.id && !rule.edited) continue;
+            const payload = uiRulePayload(rule);
+            if (rule.id) await window.api.put(`/${currentProjectId}/rules/${rule.id}`, payload);
+            else await window.api.post(`/${currentProjectId}/rules/`, payload);
+        }
+        projectsRules[currentKey] = updatedRules;
+        updateCount();
+        closeModal();
+    } catch (error) {
+        alert(`Не удалось сохранить правила: ${error.message}`);
+    }
 });

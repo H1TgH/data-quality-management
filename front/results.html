@@ -32,7 +32,7 @@
             <nav class="m-c-1">
                 <ul>
                     <li id="project_portfolio" class="active"><img src="img/project_portfolio.png" alt=""><a href="index.html">Портфель Проектов</a></li>
-                    <li id="rule_settings"><img src="img/rule_settings.png" alt=""><a href="#">Настройки Правил</a></li>
+                    <li id="rule_settings"><img src="img/rule_settings.png" alt=""><a href="front/setting.html">Настройки Правил</a></li>
                 </ul>
             </nav>
             <div class="m-c-2">
@@ -56,15 +56,15 @@
             <!-- Вкладка «Результаты проверки» -->
             <section id="panel-results">
                 <div class="summary">
-                    <div class="box score-box"><span>Оценка качества</span><b class="pink">84,7%</b></div>
+                    <div class="box score-box"><span>Оценка качества</span><b class="pink">—</b></div>
                     <div class="mid">
-                        <div class="box"><div><span>Всего строк</span><small>Проверено 14 полей</small></div><b class="green">1 070</b></div>
-                        <div class="box red-box"><span>Очищено строк</span><b class="red">70</b></div>
+                        <div class="box"><div><span>Всего строк</span><small>Строк в источнике</small></div><b class="green">—</b></div>
+                        <div class="box red-box"><span>Очищено строк</span><b class="red">—</b></div>
                     </div>
                     <div class="box donut-box">
                         <h3>Распределение ошибок по типам</h3>
                         <div class="donut-wrap">
-                            <div class="donut" id="donut"><div><b id="donutTotal">153</b><small>ошибки</small></div></div>
+                            <div class="donut" id="donut"><div><b id="donutTotal">0</b><small>ошибки</small></div></div>
                             <ul class="legend" id="legend"></ul>
                         </div>
                     </div>
@@ -79,7 +79,7 @@
 
             <!-- Вкладка «Тренд аналитика» -->
             <section id="panel-trend" hidden>
-                <select id="period" class="period" aria-label="Период"><option value="weeks">Недели</option><option value="months">Месяцы</option></select>
+                <select id="period" class="period" aria-label="Период"><option value="week">Неделя</option><option value="month">Месяцы</option></select>
                 <div class="chart-card">
                     <h2>Динамика качества данных</h2>
                     <div id="chart"></div>
@@ -87,7 +87,7 @@
             </section>
 
             <div class="foot">
-                <span class="done" id="doneAt">Проверка завершена · 10 октября 2026, 09:15</span>
+                <span class="done" id="doneAt">Загружаю данные…</span>
                 <div class="foot-btns">
                     <button class="ghost" type="button" id="csvBtn">Скачать CSV</button>
                     <button class="btn" type="button" id="publishBtn">Опубликовать в Clean Zone</button>
@@ -105,7 +105,7 @@
                 <label class="dropzone" id="upDrop" tabindex="0">
                     <svg viewBox="0 0 64 80" width="70" height="86" aria-hidden="true"><rect x="2" y="2" width="60" height="76" rx="8" fill="#F3F3F3" stroke="#BDBDBD" stroke-width="3"/><rect x="12" y="12" width="40" height="10" fill="#BDBDBD"/><rect x="12" y="30" width="40" height="3" fill="#BDBDBD"/><rect x="12" y="40" width="40" height="3" fill="#BDBDBD"/></svg>
                     <span>Перетащите CSV/XLSX файл сюда<br>или<br>нажмите для выбора</span>
-                    <input type="file" id="upInput" accept=".csv,.xlsx" hidden>
+                    <input type="file" id="upInput" accept=".csv,.xlsx,.xls" hidden>
                 </label>
             </div>
             <div id="upOk" hidden>
@@ -117,6 +117,7 @@
     </div>
     <div class="toast" id="toast" hidden></div>
 
+    <script src="js/auth.js"></script>
     <script src="js/results.js"></script>
 </body>
 </html>

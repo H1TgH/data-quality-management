@@ -32,7 +32,7 @@
             <nav class="m-c-1">
                 <ul>
                     <li id="project_portfolio" class="active"><img src="img/project_portfolio.png" alt=""><a href="#">Портфель Проектов</a></li>
-                    <li id="rule_settings"><img src="img/rule_settings.png" alt=""><a href="#">Настройки Правил</a></li>
+                    <li id="rule_settings"><img src="img/rule_settings.png" alt=""><a href="front/setting.html">Настройки Правил</a></li>
                 </ul>
             </nav>
             <div class="m-c-2">
@@ -44,15 +44,15 @@
             <div class="analis-content">
                 <div class="stat-card total_active_projects">
                     <p class="stat-label">Всего активных проектов</p>
-                    <p class="stat-value">4</p>
+                    <p class="stat-value">—</p>
                 </div>
                 <div class="stat-card average_data_score">
                     <p class="stat-label">Средняя оценка данных</p>
-                    <p class="stat-value">78%</p>
+                    <p class="stat-value">—</p>
                 </div>
                 <div class="stat-card projects_require_attention">
                     <p class="stat-label">Проекты, требующие внимания</p>
-                    <p class="stat-value">2
+                    <p class="stat-value">—
                         <svg class="warn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2 1 21h22L12 2zm1 15h-2v-2h2v2zm0-4h-2V9h2v4z"/></svg>
                     </p>
                 </div>
@@ -160,7 +160,7 @@
                     <label class="f-row">Порт: <input id="dbPort" value="5432" inputmode="numeric"></label>
                     <label class="f-row">Наименование базы данных: <input id="dbName" value="orders"></label>
                     <label class="f-row">Пользователь: <input id="dbUser" value="postgres"></label>
-                    <label class="f-row">Пароль: <input id="dbPass" type="password" value="**********"></label>
+                    <label class="f-row">Пароль: <input id="dbPass" type="password"></label>
                     <p class="msg error" id="dbError" hidden>Не удалось подключиться к базе данных!</p>
                     <div class="btn-row"><button class="btn" type="submit">Подключиться</button></div>
                 </form>
@@ -169,8 +169,8 @@
                     <p class="msg error" id="fileError" hidden>Не удалось загрузить файл!</p>
                     <label class="dropzone" id="dropzone" tabindex="0">
                         <svg viewBox="0 0 64 80" width="70" height="86" aria-hidden="true"><rect x="2" y="2" width="60" height="76" rx="8" fill="#F3F3F3" stroke="#BDBDBD" stroke-width="3"/><rect x="12" y="12" width="40" height="10" fill="#BDBDBD"/><rect x="12" y="30" width="40" height="3" fill="#BDBDBD"/><rect x="12" y="40" width="40" height="3" fill="#BDBDBD"/><rect x="12" y="50" width="24" height="3" fill="#BDBDBD"/></svg>
-                        <span>Перетащите CSV/XLSX файл сюда<br>или<br>нажмите для выбора</span>
-                        <input type="file" id="fileInput" accept=".csv,.xlsx" hidden>
+                        <span>Перетащите CSV/XLS/XLSX файл сюда<br>или<br>нажмите для выбора</span>
+                        <input type="file" id="fileInput" accept=".csv,.xlsx,.xls" hidden>
                     </label>
                     <div id="fileOk" hidden>
                         <p class="msg ok" id="fileOkText"></p>
@@ -188,10 +188,11 @@
             <section id="step2" hidden>
                 <h2 class="modal-title">Шаг 2. Автопрофилирование</h2>
                 <label class="f-row table-select" id="tableRow" hidden>Таблица:
-                    <select id="tableSelect"><option>orders</option><option>customers</option><option>products</option></select>
+                    <select id="tableSelect"></select>
                 </label>
+                <p class="msg error" id="profileError" hidden></p>
                 <div class="profile-meta">
-                    <span id="metaSource">primer.xlsx</span><span>1000 строк</span><span>14 полей</span>
+                    <span id="metaSource">—</span><span id="metaRows">— строк</span><span id="metaColumns">— полей</span>
                 </div>
                 <div class="table-wrap">
                     <table class="profile-table">
@@ -202,12 +203,7 @@
                 <div class="notes">
                     <p class="notes-title">Примечание по данным:</p>
                     <ul>
-                        <li><b>quantity, age:</b> отрицательные минимальные значения</li>
-                        <li><b>age, unit_price:</b> максимум сильно отклоняется от основной массы</li>
-                        <li><b>order_date, ship_date:</b> максимум позже текущей даты</li>
-                        <li><b>ship_date:</b> отсутствует 25% значений</li>
-                        <li><b>email, phone:</b> часть значений не соответствует типовому формату</li>
-                        <li><b>status:</b> мало уникальных значений (возможно, справочник)</li>
+                        <li>Профиль показывает фактические типы, заполненность, минимум и максимум выбранного источника.</li>
                     </ul>
                 </div>
                 <p class="clean-note">Данные будут очищены от дубликатов и Null и пройдут проверку по заданным правилам!</p>
