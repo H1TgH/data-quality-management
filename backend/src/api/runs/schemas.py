@@ -20,6 +20,12 @@ class RunResponseSchema(BaseModel):
     quality_score: float | None
 
 
+class QualityTrendPointSchema(BaseModel):
+    period: datetime
+    quality_score: float
+    runs_count: int
+
+
 class ErrorGroupSchema(BaseModel):
     rule_id: UUID | None
     rule_name: str | None

@@ -130,6 +130,11 @@ class RunService:
         runs = await self.run_repo.get_runs(project_id)
         return [dict(run._mapping) for run in runs]
 
+    async def get_quality_trend(self, project_id: str, user_id: str, period: str):
+        await self.project_service.get_project(project_id, user_id)
+        points = await self.run_repo.get_quality_trend(project_id, period)
+        return [dict(point._mapping) for point in points]
+
     async def get_run(self, project_id: str, run_id: str, user_id: str):
         await self.project_service.get_project(project_id, user_id)
         run = await self.run_repo.get_run(project_id, run_id)

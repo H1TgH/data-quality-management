@@ -11,6 +11,7 @@ from api.runs.schemas import (
     CleanZonePublicationSchema,
     ErrorGroupSchema,
     ErrorRowsSchema,
+    QualityTrendPointSchema,
     RunResponseSchema,
 )
 from core.runs.exceptions import RunPublicationException
@@ -48,6 +49,20 @@ async def get_runs(
     service: RunService = Depends(get_run_service),
 ):
     return await service.get_runs(project_id, current_user.id)
+
+
+@router.get(
+    "/{project_id}/analytics",
+    response_model=list[QualityTrendPointSchema],
+)
+@handle_project_exceptions
+async def get_quality_trend(
+    project_id: str,
+    period: str = Query(default="week", pattern="^(week|month)$"),
+    current_user: CurrentUserDTO = Depends(get_current_user),
+    service: RunService = Depends(get_run_service),
+):
+    return await service.get_quality_trend(project_id, current_user.id, period)
 
 
 @router.get(

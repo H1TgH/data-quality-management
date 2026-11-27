@@ -70,6 +70,35 @@ class RunRepository:
         )
         return result.all()
 
+    async def get_quality_trend(self, project_id: str, period: str) -> list:
+        if period == "week":
+            query = text("""
+                SELECT date_trunc('day', started_at) AS period,
+                       AVG(quality_score) AS quality_score,
+                       COUNT(*) AS runs_count
+                FROM runs
+                WHERE project_id = :project_id
+                  AND started_at >= now() - interval '7 days'
+                  AND quality_score IS NOT NULL
+                GROUP BY date_trunc('day', started_at)
+                ORDER BY period
+            """)
+        else:
+            query = text("""
+                SELECT date_trunc('month', started_at) AS period,
+                       AVG(quality_score) AS quality_score,
+                       COUNT(*) AS runs_count
+                FROM runs
+                WHERE project_id = :project_id
+                  AND started_at >= now() - interval '12 months'
+                  AND quality_score IS NOT NULL
+                GROUP BY date_trunc('month', started_at)
+                ORDER BY period
+            """)
+
+        result = await self.session.execute(query, {"project_id": project_id})
+        return result.all()
+
     async def get_run(self, project_id: str, run_id: str):
         result = await self.session.execute(
             text("""
