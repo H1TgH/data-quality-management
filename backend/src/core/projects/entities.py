@@ -32,3 +32,17 @@ class ProjectListItemDTO:
     quality_score: float | None
     last_run_at: datetime | None
     last_run_status: str | None
+    errors_count: int | None
+
+
+@dataclass
+class ProjectsSummaryDTO:
+    active_projects: int
+    average_quality_score: float | None
+    projects_requiring_attention: int
+
+
+@dataclass
+class ProjectsListDTO:
+    summary: ProjectsSummaryDTO
+    items: list[ProjectListItemDTO]

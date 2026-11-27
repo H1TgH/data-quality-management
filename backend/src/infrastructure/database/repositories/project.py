@@ -32,45 +32,56 @@ class ProjectRepository:
         return str(project_id)
 
     async def get_by_id(self, project_id: str, user_id: str) -> Row | None:
+        query = text("""
+            SELECT id, user_id, data_source_id, name, schema_name, table_name
+            FROM projects
+            WHERE id = :project_id AND user_id = :user_id
+        """)
+
         result = await self.session.execute(
-            text("""
-                SELECT id, user_id, data_source_id, name, schema_name, table_name
-                FROM projects
-                WHERE id = :project_id AND user_id = :user_id
-            """),
-            {"project_id": UUID(project_id), "user_id": UUID(user_id)},
+            query,
+            {
+                "project_id": UUID(project_id),
+                "user_id": UUID(user_id)
+            }
         )
         return result.one_or_none()
 
     async def get_projects_list(self, user_id: str) -> list[Row]:
+        query = text("""
+            SELECT
+                projects.id,
+                projects.data_source_id,
+                projects.name,
+                projects.schema_name,
+                projects.table_name,
+                COALESCE(
+                    data_sources.file_name,
+                    projects.schema_name || '.' || projects.table_name
+                ) AS source_name,
+                latest_run.quality_score,
+                COALESCE(latest_run.finished_at, latest_run.started_at) AS last_run_at,
+                latest_run.status AS last_run_status,
+                latest_run.errors_count
+            FROM projects
+            JOIN data_sources
+                ON data_sources.id = projects.data_source_id
+            LEFT JOIN runs AS latest_run
+                ON latest_run.id = (
+                    SELECT runs.id
+                    FROM runs
+                    WHERE runs.project_id = projects.id
+                    ORDER BY runs.started_at DESC, runs.id DESC
+                    LIMIT 1
+                )
+            WHERE projects.user_id = :user_id
+            ORDER BY projects.created_at DESC
+        """)
+
         result = await self.session.execute(
-            text("""
-                SELECT
-                    projects.id,
-                    projects.data_source_id,
-                    projects.name,
-                    projects.schema_name,
-                    projects.table_name,
-                    COALESCE(
-                        data_sources.file_name,
-                        projects.schema_name || '.' || projects.table_name
-                    ) AS source_name,
-                    latest_run.quality_score,
-                    COALESCE(latest_run.finished_at, latest_run.started_at) AS last_run_at,
-                    latest_run.status AS last_run_status
-                FROM projects
-                JOIN data_sources
-                    ON data_sources.id = projects.data_source_id
-                    AND data_sources.user_id = projects.user_id
-                LEFT JOIN runs AS latest_run
-                    ON latest_run.id = (
-                        SELECT runs.id
-                        FROM runs
-                        WHERE runs.project_id = projects.id
-                        ORDER BY runs.started_at DESC, runs.id DESC
-                        LIMIT 1
-                    )
-                WHERE projects.user_id = :user_id
-                ORDER BY projects.created_at DESC
-        """), {"user_id": UUID(user_id)})
+            query,
+            {
+                "user_id": UUID(user_id)
+            }
+        )
         return result.all()

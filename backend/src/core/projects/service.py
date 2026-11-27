@@ -1,7 +1,13 @@
 from core.data_sources.enums import DataSourceTypeEnum
 from core.data_sources.exceptions import DataSourceConfigurationException, DataSourceNotFoundException
 from core.data_sources.service import DataSourceService
-from core.projects.entities import ProjectCreationDTO, ProjectListItemDTO, ProjectReadDTO
+from core.projects.entities import (
+    ProjectCreationDTO,
+    ProjectListItemDTO,
+    ProjectReadDTO,
+    ProjectsListDTO,
+    ProjectsSummaryDTO,
+)
 from core.projects.exceptions import ProjectNotFoundException
 from infrastructure.database.repositories.project import ProjectRepository
 
@@ -84,10 +90,10 @@ class ProjectService:
             table_name=project.table_name,
         )
 
-    async def get_projects_list(self, user_id: str) -> list[ProjectListItemDTO]:
+    async def get_projects_list(self, user_id: str) -> ProjectsListDTO:
         projects = await self.project_repo.get_projects_list(user_id)
 
-        return [
+        items = [
             ProjectListItemDTO(
                 id=str(project.id),
                 data_source_id=str(project.data_source_id),
@@ -104,6 +110,28 @@ class ProjectService:
                     str(project.last_run_status)
                     if project.last_run_status is not None else None
                 ),
+                errors_count=project.errors_count,
             )
             for project in projects
         ]
+
+        projects_with_score = [
+            project.quality_score
+            for project in items
+            if project.quality_score is not None
+        ]
+
+        return ProjectsListDTO(
+            summary=ProjectsSummaryDTO(
+                active_projects=len(items),
+                average_quality_score=(
+                    int(sum(projects_with_score) / len(projects_with_score))
+                    if projects_with_score else None
+                ),
+                projects_requiring_attention=sum(
+                    1 for project in items
+                    if project.errors_count is not None and project.errors_count > 0
+                ),
+            ),
+            items=items,
+        )
