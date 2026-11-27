@@ -113,3 +113,11 @@
 
     renderProfile();
 })();
+
+// Клик по карточке проекта открывает результаты проверки (results.html?source=db | xlsx)
+document.querySelectorAll('.project-card').forEach((card) => {
+    card.style.cursor = 'pointer';
+    card.addEventListener('click', (e) => {
+        if (!e.target.closest('.card-menu')) location.href = 'results.html?source=db';
+    });
+});
