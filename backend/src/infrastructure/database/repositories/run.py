@@ -56,3 +56,28 @@ class RunRepository:
                 "quality_score": quality_score,
             },
         )
+
+    async def get_runs(self, project_id: str) -> list:
+        result = await self.session.execute(
+            text("""
+                SELECT id, project_id, trigger, status, started_at, finished_at,
+                       rows_total, rows_removed, errors_count, quality_score
+                FROM runs
+                WHERE project_id = :project_id
+                ORDER BY started_at DESC
+            """),
+            {"project_id": project_id},
+        )
+        return result.all()
+
+    async def get_run(self, project_id: str, run_id: str):
+        result = await self.session.execute(
+            text("""
+                SELECT id, project_id, trigger, status, started_at, finished_at,
+                       rows_total, rows_removed, errors_count, quality_score
+                FROM runs
+                WHERE project_id = :project_id AND id = :run_id
+            """),
+            {"project_id": project_id, "run_id": run_id},
+        )
+        return result.one_or_none()

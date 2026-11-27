@@ -11,6 +11,8 @@ from core.rules.entities import RuleReadDTO
 from core.rules.enums import RuleActionEnum, RuleTypeEnum
 from core.rules.service import RuleService
 from core.runs.enums import RunStatusEnum, RunTriggerEnum
+from core.runs.exceptions import RunPublicationException
+from infrastructure.database.repositories.clean_zone_publication import CleanZonePublicationRepository
 from infrastructure.database.repositories.cleaned_rows import CleanedRowsRepository
 from infrastructure.database.repositories.error_log import ErrorLogRepository
 from infrastructure.database.repositories.run import RunRepository
@@ -26,6 +28,7 @@ class RunService:
         run_repository: RunRepository,
         error_log_repository: ErrorLogRepository,
         cleaned_rows_repository: CleanedRowsRepository,
+        publication_repository: CleanZonePublicationRepository,
         postgres_client: PostgresClient,
         staging_credentials: DataSourceCredsDTO,
     ) -> None:
@@ -35,6 +38,7 @@ class RunService:
         self.run_repo = run_repository
         self.error_log_repo = error_log_repository
         self.cleaned_rows_repo = cleaned_rows_repository
+        self.publication_repo = publication_repository
         self.pg_client = postgres_client
         self.staging_credentials = staging_credentials
 
@@ -120,6 +124,160 @@ class RunService:
                 }
         finally:
             await connection.close()
+
+    async def get_runs(self, project_id: str, user_id: str):
+        await self.project_service.get_project(project_id, user_id)
+        runs = await self.run_repo.get_runs(project_id)
+        return [dict(run._mapping) for run in runs]
+
+    async def get_run(self, project_id: str, run_id: str, user_id: str):
+        await self.project_service.get_project(project_id, user_id)
+        run = await self.run_repo.get_run(project_id, run_id)
+        if run is None:
+            return None
+        return dict(run._mapping)
+
+    async def get_error_groups(self, project_id: str, run_id: str, user_id: str):
+        run = await self.get_run(project_id, run_id, user_id)
+        if run is None:
+            return None
+        groups = await self.error_log_repo.get_groups(run_id)
+        return [dict(group._mapping) for group in groups]
+
+    async def get_error_export_rows(self, project_id: str, run_id: str, user_id: str):
+        run = await self.get_run(project_id, run_id, user_id)
+        if run is None:
+            return None
+        return await self.error_log_repo.get_export_rows(run_id)
+
+    async def get_error_group_sql(
+        self,
+        project_id: str,
+        run_id: str,
+        rule_id: str,
+        field_name: str,
+        user_id: str,
+    ):
+        run = await self.get_run(project_id, run_id, user_id)
+        if run is None:
+            return None
+
+        project = await self.project_service.get_project(project_id, user_id)
+        rules_response = await self.rule_service.get_rules_list(project_id, user_id)
+        conditions = self._build_check_conditions(
+            self._get_table_name(project.schema_name, project.table_name),
+            rules_response.items,
+        )
+        return [
+            {"sql": condition["query"], "params": condition["params"]}
+            for condition in conditions
+            if str(condition["rule"].id) == rule_id
+            and field_name in condition["target_columns"]
+        ]
+
+    async def publish_to_clean_zone(
+        self,
+        project_id: str,
+        run_id: str,
+        user_id: str,
+    ) -> dict[str, Any]:
+        run = await self.get_run(project_id, run_id, user_id)
+        if run is None:
+            raise RunPublicationException("Запуск не найден")
+        if run["status"] != RunStatusEnum.SUCCESS:
+            raise RunPublicationException("Опубликовать можно только завершённый запуск")
+        if run["quality_score"] is None or float(run["quality_score"]) < 90:
+            raise RunPublicationException(
+                "Публикация доступна при оценке качества не ниже 90%"
+            )
+
+        project = await self.project_service.get_project(project_id, user_id)
+        rules_response = await self.rule_service.get_rules_list(project_id, user_id)
+        active_rules = self._keep_active_rules(rules_response.items)
+        where_conditions = []
+        remove_duplicates = False
+
+        for rule in active_rules:
+            if rule.action != RuleActionEnum.AUTO_CLEAN:
+                continue
+
+            if rule.rule_type == RuleTypeEnum.UNIQUENESS:
+                remove_duplicates = True
+            elif rule.rule_type == RuleTypeEnum.NOT_NULL:
+                for column in rule.target_columns:
+                    if column == "*":
+                        where_conditions.append(
+                            "NOT EXISTS (SELECT 1 FROM jsonb_each(to_jsonb(source_row)) "
+                            "AS source_column WHERE source_column.value = 'null'::jsonb "
+                            "OR source_column.value #>> '{}' = '')"
+                        )
+                    else:
+                        quoted_column = self._quote_identifier(column)
+                        where_conditions.append(
+                            f"source_row.{quoted_column} IS NOT NULL "
+                            f"AND BTRIM(source_row.{quoted_column}::text) <> ''"
+                        )
+
+        source_credentials = await self._get_connection_params(
+            project.data_source_id,
+            user_id,
+        )
+        view_sql = await self.pg_client.publish_clean_view(
+            **source_credentials,
+            source_schema=project.schema_name or "public",
+            table_name=project.table_name,
+            view_name=project.table_name,
+            where_conditions=where_conditions,
+            remove_duplicates=remove_duplicates,
+        )
+        publication_id = await self.publication_repo.create(
+            project_id=project_id,
+            run_id=run_id,
+            user_id=user_id,
+            view_schema="clean",
+            view_name=project.table_name,
+            view_sql=view_sql,
+        )
+
+        return {
+            "publication_id": publication_id,
+            "view_name": f"clean.{project.table_name}",
+            "quality_score": float(run["quality_score"]),
+        }
+
+    async def get_error_group_rows(
+        self,
+        project_id: str,
+        run_id: str,
+        rule_id: str,
+        field_name: str,
+        user_id: str,
+        offset: int,
+        limit: int,
+    ):
+        run = await self.get_run(project_id, run_id, user_id)
+        if run is None:
+            return None
+        rows, total = await self.error_log_repo.get_group_rows(
+            run_id=run_id,
+            rule_id=rule_id,
+            field_name=field_name,
+            offset=offset,
+            limit=limit,
+        )
+        return {"items": [dict(row._mapping) for row in rows], "total": total}
+
+    async def mark_error_row_valid(
+        self,
+        project_id: str,
+        run_id: str,
+        error_id: str,
+        user_id: str,
+    ) -> bool:
+        run = await self.get_run(project_id, run_id, user_id)
+        if run is None:
+            return False
+        return await self.error_log_repo.mark_row_valid(run_id, error_id)
 
     async def _get_connection_params(self, data_source_id: str, user_id: str) -> dict[str, Any]:
         data_source_type = await self.data_source_service.get_data_source_type(data_source_id, user_id)

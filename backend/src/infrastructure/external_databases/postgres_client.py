@@ -153,6 +153,46 @@ class PostgresClient:
         finally:
             await conn.close()
 
+    async def publish_clean_view(
+        self,
+        host: str,
+        port: int,
+        db_name: str,
+        user: str,
+        password: str,
+        source_schema: str,
+        table_name: str,
+        view_name: str,
+        where_conditions: list[str],
+        remove_duplicates: bool,
+    ) -> str:
+        conn = await self._connect(host, port, db_name, user, password)
+        source_table = (
+            f"{self._quote_identifier(source_schema)}."
+            f"{self._quote_identifier(table_name)}"
+        )
+        selected_rows = "DISTINCT *" if remove_duplicates else "*"
+        where_clause = " AND ".join(f"({condition})" for condition in where_conditions)
+        where_sql = f" WHERE {where_clause}" if where_clause else ""
+        view_sql = (
+            f"CREATE OR REPLACE VIEW {self._quote_identifier('clean')}."
+            f"{self._quote_identifier(view_name)} AS "
+            f"SELECT {selected_rows} FROM {source_table} AS source_row{where_sql}"
+        )
+
+        try:
+            await conn.execute(
+                f"CREATE SCHEMA IF NOT EXISTS {self._quote_identifier('clean')}"
+            )
+            await conn.execute(view_sql)
+            return view_sql
+        except asyncpg.InsufficientPrivilegeError as exc:
+            raise DataSourceConfigurationException(
+                "Для публикации нужны права на создание схемы clean и представлений в источнике"
+            ) from exc
+        finally:
+            await conn.close()
+
     def _build_profile_query(
         self,
         columns: list[ColumnMetadataDTO],

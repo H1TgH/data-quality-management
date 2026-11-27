@@ -19,6 +19,7 @@ from core.users.exceptions import (
 )
 from core.users.service import UserService
 from infrastructure.database.database import Session
+from infrastructure.database.repositories.clean_zone_publication import CleanZonePublicationRepository
 from infrastructure.database.repositories.cleaned_rows import CleanedRowsRepository
 from infrastructure.database.repositories.data_source import DataSourceRepository
 from infrastructure.database.repositories.error_log import ErrorLogRepository
@@ -95,6 +96,12 @@ def get_cleaned_rows_repository(
     return CleanedRowsRepository(session)
 
 
+def get_clean_zone_publication_repository(
+    session: AsyncSession = Depends(get_session),
+) -> CleanZonePublicationRepository:
+    return CleanZonePublicationRepository(session)
+
+
 def get_data_source_service(
     data_source_repository: DataSourceRepository = Depends(get_data_source_repository)
 ) -> DataSourceService:
@@ -155,6 +162,9 @@ def get_run_service(
     run_repository: RunRepository = Depends(get_run_repository),
     error_log_repository: ErrorLogRepository = Depends(get_error_log_repository),
     cleaned_rows_repository: CleanedRowsRepository = Depends(get_cleaned_rows_repository),
+    publication_repository: CleanZonePublicationRepository = Depends(
+        get_clean_zone_publication_repository
+    ),
 ) -> RunService:
     return RunService(
         project_service=project_service,
@@ -163,6 +173,7 @@ def get_run_service(
         run_repository=run_repository,
         error_log_repository=error_log_repository,
         cleaned_rows_repository=cleaned_rows_repository,
+        publication_repository=publication_repository,
         postgres_client=PostgresClient(),
         staging_credentials=DataSourceCredsDTO(
             host=settings.db.host,
